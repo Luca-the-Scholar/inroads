@@ -31,8 +31,9 @@ export default function TimerPage() {
   const [isWarmup, setIsWarmup] = useState(true);
   const [warmupSeconds, setWarmupSeconds] = useState(10);
   
-  // Mock recent practices (last 3 unique practices)
+  // Mock recent and favorite practices
   const recentPractices = practices.slice(0, 3);
+  const favoritePractices = practices.filter(p => ['breath-awareness', 'metta'].includes(p.id));
   
   useEffect(() => {
     if (!isRunning) return;
@@ -121,7 +122,22 @@ export default function TimerPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                    {favoritePractices.length > 0 && (
+                      <>
+                        <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                          Favorites
+                        </div>
+                        {favoritePractices.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            <div className="flex flex-col items-start">
+                              <span className="font-medium">{p.title}</span>
+                              <span className="text-xs text-muted-foreground">{p.teacher.name}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
+                    <div className={`px-2 py-1.5 text-xs font-medium text-muted-foreground ${favoritePractices.length > 0 ? 'border-t mt-1' : ''}`}>
                       Recent
                     </div>
                     {recentPractices.map((p) => (
@@ -135,7 +151,7 @@ export default function TimerPage() {
                     <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground border-t mt-1">
                       All Practices
                     </div>
-                    {practices.filter(p => !recentPractices.includes(p)).map((p) => (
+                    {practices.filter(p => !recentPractices.includes(p) && !favoritePractices.includes(p)).map((p) => (
                       <SelectItem key={p.id} value={p.id}>
                         <div className="flex flex-col items-start">
                           <span className="font-medium">{p.title}</span>
