@@ -140,7 +140,7 @@ export default function TimerPage() {
                     <div className={`px-2 py-1.5 text-xs font-medium text-muted-foreground ${favoritePractices.length > 0 ? 'border-t mt-1' : ''}`}>
                       Recent
                     </div>
-                    {recentPractices.map((p) => (
+                    {recentPractices.filter(p => !favoritePractices.includes(p)).slice(0, 3).map((p) => (
                       <SelectItem key={p.id} value={p.id}>
                         <div className="flex flex-col items-start">
                           <span className="font-medium">{p.title}</span>
