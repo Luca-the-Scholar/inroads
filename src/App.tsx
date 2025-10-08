@@ -25,7 +25,7 @@ const App = () => (
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/" element={<><Library /><BottomNav /></>} />
           <Route path="/practice/:id" element={<><PracticeDetail /><BottomNav /></>} />
-          <Route path="/timer" element={<TimerPage />} />
+          <Route path="/timer" element={<><TimerPage /><BottomNav /></>} />
           <Route path="/session-complete" element={<><SessionComplete /><BottomNav /></>} />
           <Route path="/progress" element={<><Progress /><BottomNav /></>} />
           <Route path="/settings" element={<Settings />} />
