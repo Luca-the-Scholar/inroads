@@ -31,10 +31,10 @@ export function PracticeCard({ practice }: PracticeCardProps) {
         </div>
         <button
           onClick={handleInfo}
-          className="text-muted-foreground hover:text-foreground transition-colors"
+          className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
           aria-label="View practice details"
         >
-          <Info className="w-5 h-5" />
+          Learn More
         </button>
       </div>
       
