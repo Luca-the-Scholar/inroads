@@ -9,6 +9,10 @@ export interface Practice {
     name: string;
     context: string;
   };
+  research: {
+    summary: string;
+    findings: string[];
+  };
   tags: string[];
   durations: number[]; // in minutes
   guide: {
@@ -36,6 +40,15 @@ export const practices: Practice[] = [
     scholar: {
       name: "Dr. N. Sujato",
       context: "Ānāpānasati (mindfulness of breathing) appears in the Pāli Canon as one of the Buddha's primary meditation instructions. It is the first of the four foundations of mindfulness and is considered suitable for all temperaments. Historical sources link this practice to both samatha (calm) and vipassanā (insight) traditions.",
+    },
+    research: {
+      summary: "Breath-focused meditation has been extensively studied for its effects on stress reduction, attention, and emotional regulation.",
+      findings: [
+        "Meta-analysis shows significant reduction in anxiety and depression symptoms",
+        "fMRI studies reveal increased activity in prefrontal cortex and decreased amygdala reactivity",
+        "Improves heart rate variability and parasympathetic nervous system function",
+        "Associated with increased gray matter density in brain regions related to attention"
+      ]
     },
     tags: ["Theravāda", "Awareness", "Foundation"],
     durations: [5, 10, 30],
@@ -71,6 +84,15 @@ export const practices: Practice[] = [
       name: "Dr. Analayo",
       context: "Mettā bhāvanā is one of the four Brahmavihāras (divine abodes) described in early Buddhist texts. It counters ill-will and anger, and is traditionally used to develop both concentration and heart qualities. The Karaniya Metta Sutta is the most famous discourse on this practice.",
     },
+    research: {
+      summary: "Loving-kindness meditation has shown measurable effects on social connection, positive emotions, and physiological markers of well-being.",
+      findings: [
+        "Increases positive emotions and social connectedness after just 7 weeks of practice",
+        "Enhances vagal tone, linked to improved emotional regulation",
+        "Reduces implicit bias and increases empathy toward out-group members",
+        "Associated with increased telomere length, a marker of cellular aging"
+      ]
+    },
     tags: ["Theravāda", "Heart", "Brahmavihāra"],
     durations: [5, 10, 20],
     guide: {
@@ -104,6 +126,15 @@ export const practices: Practice[] = [
     scholar: {
       name: "Dr. Joanna Macy",
       context: "The body scan draws from the second foundation of mindfulness (kāyānupassanā) in the Satipaṭṭhāna Sutta. While traditional instructions focus on posture and elements, modern body scans integrate somatic psychology and stress reduction, popularized through MBSR (Mindfulness-Based Stress Reduction).",
+    },
+    research: {
+      summary: "Body scan meditation is a core component of MBSR and has been studied for pain management and stress reduction.",
+      findings: [
+        "Reduces chronic pain intensity and pain-related distress in clinical trials",
+        "Decreases cortisol levels and inflammatory markers",
+        "Improves interoceptive awareness and body-mind connection",
+        "Effective for managing symptoms of fibromyalgia and irritable bowel syndrome"
+      ]
     },
     tags: ["MBSR", "Somatic", "Awareness"],
     durations: [10, 20, 30],
@@ -139,6 +170,15 @@ export const practices: Practice[] = [
       name: "Dr. B. Alan Wallace",
       context: "This practice aligns with vipassanā (insight) meditation and Dzogchen's rigpa (open awareness). It differs from focused attention by not selecting a single object. Cognitive science studies suggest it enhances meta-awareness and reduces the default mode network's activity.",
     },
+    research: {
+      summary: "Open monitoring meditation shows distinct neural patterns compared to focused attention practices.",
+      findings: [
+        "Reduces activity in default mode network, associated with mind-wandering",
+        "Enhances meta-awareness and cognitive flexibility",
+        "Shows different EEG patterns than focused attention meditation",
+        "May be more effective for creative problem-solving and divergent thinking"
+      ]
+    },
     tags: ["Vipassanā", "Awareness", "Advanced"],
     durations: [10, 20, 30],
     guide: {
@@ -172,6 +212,15 @@ export const practices: Practice[] = [
     scholar: {
       name: "Dr. Gil Fronsdal",
       context: "Cankama (walking meditation) is one of the four traditional postures for meditation in Buddhism, alongside sitting, standing, and reclining. It is used to balance energy, prevent drowsiness, and develop continuous mindfulness in daily life. The Satipaṭṭhāna Sutta includes walking as a key contemplation.",
+    },
+    research: {
+      summary: "Walking meditation combines mindfulness with gentle physical activity, offering unique benefits for both mental and physical health.",
+      findings: [
+        "Improves balance and gait in elderly populations",
+        "Reduces symptoms of depression comparable to seated meditation",
+        "May be more accessible for those with physical discomfort during seated practice",
+        "Enhances mind-body integration and proprioceptive awareness"
+      ]
     },
     tags: ["Movement", "Mindfulness", "Theravāda"],
     durations: [5, 10, 15],
@@ -207,6 +256,15 @@ export const practices: Practice[] = [
       name: "Dr. Daniel Ingram",
       context: "Noting is associated with Mahasi Sayadaw's Burmese vipassanā tradition. It formalizes the practice of sati (mindfulness) by naming the objects of awareness. This method is popular in contemporary insight meditation and is considered efficient for developing both concentration and insight.",
     },
+    research: {
+      summary: "Noting practice enhances metacognitive awareness and emotional regulation through explicit labeling of experiences.",
+      findings: [
+        "Verbal labeling of emotions reduces amygdala activity and emotional reactivity",
+        "Improves mindfulness trait scores more rapidly than other techniques",
+        "Enhances interoceptive accuracy and self-awareness",
+        "Particularly effective for managing anxiety and rumination"
+      ]
+    },
     tags: ["Vipassanā", "Mahasi", "Technique"],
     durations: [10, 20, 30],
     guide: {
@@ -241,6 +299,15 @@ export const practices: Practice[] = [
       name: "Dr. Taigen Dan Leighton",
       context: "Zazen is the heart of Sōtō Zen practice. Unlike koan study (Rinzai), Sōtō emphasizes shikantaza—objectless meditation. Dōgen Zenji taught that zazen is not a means to enlightenment but the expression of enlightenment itself. This non-goal-oriented approach influences modern Western mindfulness.",
     },
+    research: {
+      summary: "Zen meditation has been studied for its unique approach to consciousness and its effects on attention and self-referential processing.",
+      findings: [
+        "Long-term practitioners show reduced habitual responding and increased present-moment awareness",
+        "Associated with decreased self-referential thinking and ego-dissolution experiences",
+        "Unique brain activity patterns distinct from other meditation styles",
+        "May enhance acceptance and reduce avoidance behaviors in psychological distress"
+      ]
+    },
     tags: ["Zen", "Sōtō", "Awareness"],
     durations: [10, 20, 40],
     guide: {
@@ -274,6 +341,15 @@ export const practices: Practice[] = [
     scholar: {
       name: "Dr. Reginald Ray",
       context: "Tonglen is a Tibetan Buddhist lojong (mind training) practice, associated with the Kadampa and later Kagyu traditions. It is part of the bodhisattva path, which emphasizes compassion for all beings. The practice subverts ego-clinging and is considered advanced, as it requires stable equanimity.",
+    },
+    research: {
+      summary: "Compassion-based practices like Tonglen are being studied for their effects on prosocial behavior and emotional resilience.",
+      findings: [
+        "Increases compassionate behavior and altruistic actions in laboratory settings",
+        "May enhance resilience to secondary traumatic stress in caregiving professions",
+        "Associated with increased neural activity in empathy-related brain regions",
+        "Shows promise for treating PTSD and trauma through counter-intuitive engagement"
+      ]
     },
     tags: ["Tibetan", "Heart", "Advanced"],
     durations: [10, 15, 20],

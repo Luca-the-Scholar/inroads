@@ -44,9 +44,10 @@ export default function PracticeDetail() {
         <div className="px-4 py-6 space-y-6">
           {/* Tabs */}
           <Tabs defaultValue="teacher" className="w-full">
-            <TabsList className="w-full grid grid-cols-3">
+            <TabsList className="w-full grid grid-cols-4">
               <TabsTrigger value="teacher">Teacher</TabsTrigger>
               <TabsTrigger value="scholar">Scholar</TabsTrigger>
+              <TabsTrigger value="research">Research</TabsTrigger>
               <TabsTrigger value="guide">Guide</TabsTrigger>
             </TabsList>
             
@@ -69,6 +70,24 @@ export default function PracticeDetail() {
                 <p className="text-scholar font-serif leading-relaxed">
                   {practice.scholar.context}
                 </p>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="research" className="mt-4">
+              <Card className="p-5">
+                <h3 className="font-semibold text-foreground mb-3">Related Medical Research</h3>
+                <p className="text-foreground leading-relaxed mb-4">
+                  {practice.research.summary}
+                </p>
+                <h4 className="text-sm font-semibold text-muted-foreground mb-2">Key Findings</h4>
+                <ul className="space-y-2">
+                  {practice.research.findings.map((finding, index) => (
+                    <li key={index} className="flex gap-3">
+                      <span className="text-primary font-semibold">•</span>
+                      <span className="text-foreground text-sm">{finding}</span>
+                    </li>
+                  ))}
+                </ul>
               </Card>
             </TabsContent>
             
