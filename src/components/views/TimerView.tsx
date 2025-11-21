@@ -31,7 +31,7 @@ export function TimerView() {
   const [masteryAfter, setMasteryAfter] = useState(0);
   const [manualEntry, setManualEntry] = useState(false);
   const [manualMinutes, setManualMinutes] = useState("");
-  const presetDurations = [5, 10, 20, 40];
+  const presetDurations = [5, 10, 20, 60];
   useEffect(() => {
     fetchTechniques();
   }, []);
