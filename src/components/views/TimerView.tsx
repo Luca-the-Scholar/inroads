@@ -28,6 +28,8 @@ export function TimerView() {
   const [initialDuration, setInitialDuration] = useState(0);
   const [masteryBefore, setMasteryBefore] = useState(0);
   const [masteryAfter, setMasteryAfter] = useState(0);
+  const [manualEntry, setManualEntry] = useState(false);
+  const [manualMinutes, setManualMinutes] = useState("");
   const presetDurations = [5, 10, 20, 40];
   useEffect(() => {
     fetchTechniques();
@@ -173,6 +175,23 @@ export function TimerView() {
     setSecondsLeft(0);
     setMasteryBefore(0);
     setMasteryAfter(0);
+    setManualEntry(false);
+    setManualMinutes("");
+  };
+
+  const handleManualEntry = async () => {
+    const minutes = parseInt(manualMinutes);
+    if (!minutes || minutes < 1 || !selectedTechniqueId) {
+      toast({
+        title: "Invalid entry",
+        description: "Please enter a valid duration",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    await fetchCurrentMastery();
+    await logSession(minutes, false);
   };
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -300,11 +319,33 @@ export function TimerView() {
   // Setup Screen
   return <div className="min-h-screen bg-background pb-24 px-4">
       <div className="max-w-2xl mx-auto pt-8 space-y-8">
+        {/* Manual Entry Toggle */}
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <button
+            onClick={() => setManualEntry(false)}
+            className={`px-4 py-2 rounded-lg transition-colors ${
+              !manualEntry ? 'bg-primary text-primary-foreground' : 'bg-accent text-muted-foreground'
+            }`}
+          >
+            Timer
+          </button>
+          <button
+            onClick={() => setManualEntry(true)}
+            className={`px-4 py-2 rounded-lg transition-colors ${
+              manualEntry ? 'bg-primary text-primary-foreground' : 'bg-accent text-muted-foreground'
+            }`}
+          >
+            Manual Entry
+          </button>
+        </div>
+
         {/* Technique Selector */}
         <div className="space-y-4">
           <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold mb-2">Begin Practice</h1>
-            <p className="text-muted-foreground">Choose a technique and duration</p>
+            <h1 className="text-3xl font-bold mb-2">{manualEntry ? "Log Session" : "Begin Practice"}</h1>
+            <p className="text-muted-foreground">
+              {manualEntry ? "Enter session details" : "Choose a technique and duration"}
+            </p>
           </div>
 
           <Card className="p-4 cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => document.getElementById('technique-select')?.click()}>
@@ -334,41 +375,63 @@ export function TimerView() {
           </Select>
         </div>
 
-        {/* Duration Selection */}
-        <div className="space-y-6">
-          <div>
-            <h3 className="font-semibold mb-4 text-center">Duration</h3>
-            <div className="grid grid-cols-4 gap-3 mb-6">
-              {presetDurations.map(preset => <Button key={preset} variant={duration === preset ? "default" : "outline"} onClick={() => setDuration(preset)} className="h-16">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">{preset}</div>
-                    <div className="text-xs opacity-80">min</div>
-                  </div>
-                </Button>)}
-            </div>
-
+        {/* Duration/Manual Entry Section */}
+        {manualEntry ? (
+          <div className="space-y-6">
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Custom Duration</span>
-                <span className="text-lg font-semibold">{duration} min</span>
-              </div>
-              <Slider value={[duration]} onValueChange={vals => setDuration(vals[0])} min={1} max={120} step={1} className="py-4" />
-              <div className="flex items-center gap-2">
-                <Input type="number" value={duration} onChange={e => {
-                const val = parseInt(e.target.value) || 1;
-                setDuration(Math.max(1, Math.min(120, val)));
-              }} min={1} max={120} className="text-center" placeholder="Enter minutes" />
-                <span className="text-sm text-muted-foreground whitespace-nowrap">minutes</span>
+              <label className="text-sm font-medium">Duration (minutes)</label>
+              <Input
+                type="number"
+                value={manualMinutes}
+                onChange={(e) => setManualMinutes(e.target.value)}
+                min={1}
+                placeholder="Enter minutes practiced"
+                className="text-center text-lg h-14"
+              />
+            </div>
+            <Button onClick={handleManualEntry} size="lg" className="w-full h-16 text-lg">
+              <Check className="w-6 h-6 mr-2" />
+              Log Session
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="space-y-6">
+              <div>
+                <h3 className="font-semibold mb-4 text-center">Duration</h3>
+                <div className="grid grid-cols-4 gap-3 mb-6">
+                  {presetDurations.map(preset => <Button key={preset} variant={duration === preset ? "default" : "outline"} onClick={() => setDuration(preset)} className="h-16">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold">{preset}</div>
+                        <div className="text-xs opacity-80">min</div>
+                      </div>
+                    </Button>)}
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Custom Duration</span>
+                    <span className="text-lg font-semibold">{duration} min</span>
+                  </div>
+                  <Slider value={[duration]} onValueChange={vals => setDuration(vals[0])} min={1} max={120} step={1} className="py-4" />
+                  <div className="flex items-center gap-2">
+                    <Input type="number" value={duration} onChange={e => {
+                    const val = parseInt(e.target.value) || 1;
+                    setDuration(Math.max(1, Math.min(120, val)));
+                  }} min={1} max={120} className="text-center" placeholder="Enter minutes" />
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">minutes</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Start Button */}
-        <Button onClick={handleStart} size="lg" className="w-full h-16 text-lg">
-          <Play className="w-6 h-6 mr-2" />
-          Start Session
-        </Button>
+            {/* Start Button */}
+            <Button onClick={handleStart} size="lg" className="w-full h-16 text-lg">
+              <Play className="w-6 h-6 mr-2" />
+              Start Session
+            </Button>
+          </>
+        )}
       </div>
     </div>;
 }

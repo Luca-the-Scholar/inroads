@@ -191,6 +191,16 @@ export function LibraryView() {
     );
   }
 
+  // Group techniques by tradition
+  const groupedByTradition = techniques.reduce((acc, technique) => {
+    const tradition = technique.tradition || "Uncategorized";
+    if (!acc[tradition]) acc[tradition] = [];
+    acc[tradition].push(technique);
+    return acc;
+  }, {} as Record<string, Technique[]>);
+
+  const traditions = Object.keys(groupedByTradition).sort();
+
   return (
     <div className="min-h-screen bg-background pb-24">
       <header className="sticky top-0 bg-background/95 backdrop-blur-lg border-b border-border z-40 px-4 py-4">
@@ -214,47 +224,51 @@ export function LibraryView() {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {techniques.map((technique) => (
-              <Card key={technique.id} className="p-4 hover:bg-accent/50 transition-colors relative group">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => handleDeleteTechnique(technique.id)}
-                >
-                  <Trash2 className="w-4 h-4 text-destructive" />
-                </Button>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold truncate">{technique.name}</h3>
-                    {technique.is_favorite && (
-                      <Star className="w-4 h-4 fill-primary text-primary flex-shrink-0" />
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {technique.tradition}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatLastPracticed(technique.lastPracticed)}
-                  </p>
-                  {technique.tags && technique.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {technique.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                  <div className="text-center pt-2 border-t border-border mt-3">
-                    <div className="text-xl font-bold text-primary">
-                      {technique.mastery?.toFixed(0) || 0}%
-                    </div>
-                    <div className="text-xs text-muted-foreground">mastery</div>
-                  </div>
+          <div className="space-y-8">
+            {traditions.map((tradition) => (
+              <div key={tradition}>
+                <h2 className="text-lg font-semibold mb-3 px-1">{tradition}</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {groupedByTradition[tradition].map((technique) => (
+                    <Card key={technique.id} className="p-4 hover:bg-accent/50 transition-colors relative group">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handleDeleteTechnique(technique.id)}
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold truncate">{technique.name}</h3>
+                          {technique.is_favorite && (
+                            <Star className="w-4 h-4 fill-primary text-primary flex-shrink-0" />
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {formatLastPracticed(technique.lastPracticed)}
+                        </p>
+                        {technique.tags && technique.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {technique.tags.map((tag) => (
+                              <Badge key={tag} variant="secondary" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                        <div className="text-center pt-2 border-t border-border mt-3">
+                          <div className="text-xl font-bold text-primary">
+                            {technique.mastery?.toFixed(0) || 0}%
+                          </div>
+                          <div className="text-xs text-muted-foreground">mastery</div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
         )}
