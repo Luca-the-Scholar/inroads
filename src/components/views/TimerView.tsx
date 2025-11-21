@@ -5,7 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Pause, Square, Check } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Play, Pause, Square, Check, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 interface Technique {
   id: string;
@@ -318,9 +319,9 @@ export function TimerView() {
 
   // Setup Screen
   return <div className="min-h-screen bg-background pb-24 px-4">
-      <div className="max-w-2xl mx-auto pt-8 space-y-8">
+      <div className="max-w-2xl mx-auto pt-6 space-y-6">
         {/* Manual Entry Toggle */}
-        <div className="flex items-center justify-center gap-3 mb-4">
+        <div className="flex items-center justify-center gap-3">
           <button
             onClick={() => setManualEntry(false)}
             className={`px-4 py-2 rounded-lg transition-colors ${
@@ -340,27 +341,43 @@ export function TimerView() {
         </div>
 
         {/* Technique Selector */}
-        <div className="space-y-4">
-          <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold mb-2">{manualEntry ? "Log Session" : "Begin Practice"}</h1>
-            <p className="text-muted-foreground">
+        <div className="space-y-3">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-1">{manualEntry ? "Log Session" : "Begin Practice"}</h1>
+            <p className="text-sm text-muted-foreground">
               {manualEntry ? "Enter session details" : "Choose a technique and duration"}
             </p>
           </div>
 
-          <Card className="p-4 cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => document.getElementById('technique-select')?.click()}>
-            {selectedTechnique ? <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold text-lg">{selectedTechnique.name}</h3>
-                  <span className="text-xs text-muted-foreground">Change</span>
+          <Card className="p-3">
+            {selectedTechnique ? <div className="flex items-center justify-between gap-3">
+                <div className="flex-1 cursor-pointer" onClick={() => document.getElementById('technique-select')?.click()}>
+                  <h3 className="font-semibold">{selectedTechnique.name}</h3>
+                  <p className="text-xs text-muted-foreground">{selectedTechnique.tradition}</p>
                 </div>
-                <p className="text-sm text-muted-foreground mb-3">
-                  {selectedTechnique.tradition}
-                </p>
-                <p className="text-sm text-foreground/80 line-clamp-3">
-                  {selectedTechnique.instructions}
-                </p>
-              </div> : <p className="text-muted-foreground">Select a technique</p>}
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <Info className="w-4 h-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>{selectedTechnique.name}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground mb-1">Tradition</p>
+                        <p className="text-sm">{selectedTechnique.tradition}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground mb-1">Instructions</p>
+                        <p className="text-sm">{selectedTechnique.instructions}</p>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div> : <p className="text-muted-foreground text-sm">Select a technique</p>}
           </Card>
 
           <Select value={selectedTechniqueId} onValueChange={setSelectedTechniqueId}>
@@ -377,8 +394,8 @@ export function TimerView() {
 
         {/* Duration/Manual Entry Section */}
         {manualEntry ? (
-          <div className="space-y-6">
-            <div className="space-y-3">
+          <div className="space-y-4">
+            <div className="space-y-2">
               <label className="text-sm font-medium">Duration (minutes)</label>
               <Input
                 type="number"
@@ -386,48 +403,41 @@ export function TimerView() {
                 onChange={(e) => setManualMinutes(e.target.value)}
                 min={1}
                 placeholder="Enter minutes practiced"
-                className="text-center text-lg h-14"
+                className="text-center text-lg h-12"
               />
             </div>
-            <Button onClick={handleManualEntry} size="lg" className="w-full h-16 text-lg">
-              <Check className="w-6 h-6 mr-2" />
+            <Button onClick={handleManualEntry} size="lg" className="w-full h-14">
+              <Check className="w-5 h-5 mr-2" />
               Log Session
             </Button>
           </div>
         ) : (
           <>
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div>
-                <h3 className="font-semibold mb-4 text-center">Duration</h3>
-                <div className="grid grid-cols-4 gap-3 mb-6">
-                  {presetDurations.map(preset => <Button key={preset} variant={duration === preset ? "default" : "outline"} onClick={() => setDuration(preset)} className="h-16">
+                <h3 className="font-semibold mb-3 text-center text-sm">Duration</h3>
+                <div className="grid grid-cols-4 gap-2 mb-4">
+                  {presetDurations.map(preset => <Button key={preset} variant={duration === preset ? "default" : "outline"} onClick={() => setDuration(preset)} className="h-14">
                       <div className="text-center">
-                        <div className="text-2xl font-bold">{preset}</div>
+                        <div className="text-xl font-bold">{preset}</div>
                         <div className="text-xs opacity-80">min</div>
                       </div>
                     </Button>)}
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Custom Duration</span>
-                    <span className="text-lg font-semibold">{duration} min</span>
+                    <span className="text-xs text-muted-foreground">Custom</span>
+                    <span className="text-sm font-semibold">{duration} min</span>
                   </div>
-                  <Slider value={[duration]} onValueChange={vals => setDuration(vals[0])} min={1} max={120} step={1} className="py-4" />
-                  <div className="flex items-center gap-2">
-                    <Input type="number" value={duration} onChange={e => {
-                    const val = parseInt(e.target.value) || 1;
-                    setDuration(Math.max(1, Math.min(120, val)));
-                  }} min={1} max={120} className="text-center" placeholder="Enter minutes" />
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">minutes</span>
-                  </div>
+                  <Slider value={[duration]} onValueChange={vals => setDuration(vals[0])} min={1} max={120} step={1} className="py-2" />
                 </div>
               </div>
             </div>
 
             {/* Start Button */}
-            <Button onClick={handleStart} size="lg" className="w-full h-16 text-lg">
-              <Play className="w-6 h-6 mr-2" />
+            <Button onClick={handleStart} size="lg" className="w-full h-14">
+              <Play className="w-5 h-5 mr-2" />
               Start Session
             </Button>
           </>
