@@ -80,16 +80,22 @@ export function ProfileView() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
+      <header className="sticky top-0 bg-background/95 backdrop-blur-lg border-b border-border z-40 px-4 py-4">
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-2xl font-bold">Profile</h1>
+        </div>
+      </header>
+
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
         {/* Profile Header */}
         <div className="text-center space-y-4">
-          <Avatar className="w-24 h-24 mx-auto border-2 border-primary">
-            <AvatarFallback className="text-2xl bg-primary/20 text-primary">
+          <Avatar className="w-32 h-32 mx-auto border-4 border-primary shadow-lg">
+            <AvatarFallback className="text-4xl bg-primary/20 text-primary">
               {userName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-2xl font-bold">{userName}</h1>
+            <h2 className="text-3xl font-bold">{userName}</h2>
             <p className="text-sm text-muted-foreground">{userEmail}</p>
           </div>
         </div>

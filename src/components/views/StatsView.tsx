@@ -130,19 +130,51 @@ export function StatsView() {
     );
   }
 
+  // Calculate summary stats
+  const totalMinutes = techniquesData.reduce((sum, t) => sum + t.totalMinutes, 0);
+  const totalSessions = techniquesData.reduce((sum, t) => sum + t.sessions.length, 0);
+  const avgSessionMinutes = totalSessions > 0 ? Math.round(totalMinutes / totalSessions) : 0;
+  const totalHours = Math.floor(totalMinutes / 60);
+  const remainingMinutes = totalMinutes % 60;
+
   return (
     <div className="min-h-screen bg-background pb-24">
       <header className="sticky top-0 bg-background/95 backdrop-blur-lg border-b border-border z-40 px-4 py-4">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-2xl font-bold">Practice Stats</h1>
+          <h1 className="text-2xl font-bold">Stats</h1>
           <p className="text-sm text-muted-foreground">
             Track your progress across all techniques
           </p>
         </div>
       </header>
 
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
-        {techniquesData.map((technique) => (
+      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+        {/* Summary Stats */}
+        <Card className="p-6 bg-gradient-to-br from-primary/10 to-primary/5">
+          <h2 className="text-lg font-semibold mb-4">Overall Progress</h2>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-primary">
+                {totalHours}h {remainingMinutes}m
+              </div>
+              <div className="text-xs text-muted-foreground">Total Time</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-primary">{totalSessions}</div>
+              <div className="text-xs text-muted-foreground">Sessions</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-primary">{avgSessionMinutes}m</div>
+              <div className="text-xs text-muted-foreground">Avg Session</div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Per-Technique Stats */}
+        <div>
+          <h2 className="text-lg font-semibold mb-3 px-1">By Technique</h2>
+          <div className="space-y-4">
+            {techniquesData.map((technique) => (
           <Collapsible key={technique.id}>
             <Card className="overflow-hidden">
               <CollapsibleTrigger className="w-full p-4 hover:bg-accent/50 transition-colors">
@@ -228,7 +260,9 @@ export function StatsView() {
               </CollapsibleContent>
             </Card>
           </Collapsible>
-        ))}
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
