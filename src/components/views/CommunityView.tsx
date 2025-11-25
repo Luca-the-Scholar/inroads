@@ -4,8 +4,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Users, UserPlus, Check, X, Search, Flame } from "lucide-react";
+import { Users, UserPlus, Check, X, Search, Flame, User, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface FriendProfile {
   id: string;
@@ -26,6 +27,17 @@ interface FriendStats {
   totalMinutes: number;
   currentStreak: number;
   totalSessions: number;
+  recentTechniques?: Array<{
+    technique_name: string;
+    total_minutes: number;
+    session_count: number;
+  }>;
+}
+
+interface UserProfile {
+  id: string;
+  name: string;
+  profile_visibility: string;
 }
 
 export function CommunityView() {
@@ -34,6 +46,8 @@ export function CommunityView() {
   const [searchEmail, setSearchEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [friendStats, setFriendStats] = useState<Record<string, FriendStats>>({});
+  const [selectedProfile, setSelectedProfile] = useState<string | null>(null);
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -99,71 +113,42 @@ export function CommunityView() {
 
   const fetchFriendStats = async (friendId: string) => {
     try {
-      // Get total sessions and minutes
-      const { data: sessions } = await supabase
-        .from("sessions")
-        .select("duration_minutes")
-        .eq("user_id", friendId);
+      const { data, error } = await supabase
+        .rpc('get_user_profile_stats', { profile_user_id: friendId });
 
-      const totalMinutes = sessions?.reduce((sum, s) => sum + s.duration_minutes, 0) || 0;
-      const totalSessions = sessions?.length || 0;
-
-      // Get current streak from mastery scores
-      const { data: masteryData } = await supabase
-        .from("mastery_scores")
-        .select("streak")
-        .eq("user_id", friendId)
-        .order("streak", { ascending: false })
-        .limit(1)
-        .single();
-
-      setFriendStats(prev => ({
-        ...prev,
-        [friendId]: {
-          totalMinutes,
-          totalSessions,
-          currentStreak: masteryData?.streak || 0
-        }
-      }));
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        const stats = data[0];
+        const recentTechniques = Array.isArray(stats.recent_techniques) 
+          ? stats.recent_techniques as Array<{ technique_name: string; total_minutes: number; session_count: number; }>
+          : [];
+          
+        setFriendStats(prev => ({
+          ...prev,
+          [friendId]: {
+            totalMinutes: stats.total_minutes || 0,
+            currentStreak: stats.current_streak || 0,
+            totalSessions: stats.total_sessions || 0,
+            recentTechniques
+          }
+        }));
+      }
     } catch (error) {
-      console.error("Error fetching friend stats:", error);
+      console.error('Error fetching friend stats:', error);
     }
   };
 
+  const openProfileDialog = (friendId: string) => {
+    setSelectedProfile(friendId);
+    setProfileDialogOpen(true);
+  };
+
   const sendFriendRequest = async () => {
-    if (!searchEmail.trim()) {
-      toast({
-        title: "Enter an email",
-        description: "Please enter your friend's email address",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Find user by email through profiles
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id")
-        .limit(1);
-
-      // For now, show a message that they need to know the user ID
-      toast({
-        title: "Feature coming soon",
-        description: "Friend search by email is being implemented. For now, share user IDs directly.",
-      });
-
-      setSearchEmail("");
-    } catch (error: any) {
-      toast({
-        title: "Error sending request",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
+    toast({
+      title: "Coming soon!",
+      description: "Friend requests will be available in a future update.",
+    });
   };
 
   const respondToRequest = async (friendshipId: string, accept: boolean) => {
@@ -336,7 +321,7 @@ export function CommunityView() {
                         </Button>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-3 pt-3 border-t border-border">
+                       <div className="grid grid-cols-3 gap-3 pt-3 border-t border-border">
                         <div className="text-center">
                           <div className="text-xl font-bold text-primary">
                             {formatTime(stats.totalMinutes)}
@@ -359,6 +344,16 @@ export function CommunityView() {
                           <div className="text-xs text-muted-foreground">Sessions</div>
                         </div>
                       </div>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openProfileDialog(friendId)}
+                        className="w-full mt-3"
+                      >
+                        <User className="h-3 w-3 mr-1" />
+                        View Full Profile
+                      </Button>
                     </div>
                   </Card>
                 );
@@ -367,6 +362,53 @@ export function CommunityView() {
           )}
         </div>
       </div>
+
+      <Dialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Profile Details</DialogTitle>
+          </DialogHeader>
+          {selectedProfile && friendStats[selectedProfile] && (
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-semibold mb-2">Recent Techniques</h4>
+                {friendStats[selectedProfile].recentTechniques && friendStats[selectedProfile].recentTechniques!.length > 0 ? (
+                  <div className="space-y-2">
+                    {friendStats[selectedProfile].recentTechniques!.map((tech, idx) => (
+                      <Card key={idx} className="p-3">
+                        <div className="font-medium">{tech.technique_name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {Math.floor(tech.total_minutes / 60)}h {tech.total_minutes % 60}m · {tech.session_count} sessions
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No recent practice data</p>
+                )}
+              </div>
+              
+              <div className="pt-4 border-t">
+                <h4 className="font-semibold mb-2">Overall Stats</h4>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <div className="text-muted-foreground">Total Time</div>
+                    <div className="font-medium">{formatTime(friendStats[selectedProfile].totalMinutes)}</div>
+                  </div>
+                  <div>
+                    <div className="text-muted-foreground">Current Streak</div>
+                    <div className="font-medium">{friendStats[selectedProfile].currentStreak} days</div>
+                  </div>
+                  <div>
+                    <div className="text-muted-foreground">Total Sessions</div>
+                    <div className="font-medium">{friendStats[selectedProfile].totalSessions}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
