@@ -82,12 +82,62 @@ export type Database = {
           },
         ]
       }
+      mock_health_metrics: {
+        Row: {
+          created_at: string | null
+          energy_level: number | null
+          heart_rate_avg: number | null
+          heart_rate_resting: number | null
+          id: string
+          metric_date: string
+          mindful_minutes: number | null
+          mood_score: number | null
+          sleep_hours: number | null
+          steps: number | null
+          stress_level: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          energy_level?: number | null
+          heart_rate_avg?: number | null
+          heart_rate_resting?: number | null
+          id?: string
+          metric_date: string
+          mindful_minutes?: number | null
+          mood_score?: number | null
+          sleep_hours?: number | null
+          steps?: number | null
+          stress_level?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          energy_level?: number | null
+          heart_rate_avg?: number | null
+          heart_rate_resting?: number | null
+          id?: string
+          metric_date?: string
+          mindful_minutes?: number | null
+          mood_score?: number | null
+          sleep_hours?: number | null
+          steps?: number | null
+          stress_level?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
           id: string
           name: string | null
           profile_preferences: Json | null
+          profile_visibility: string | null
+          share_health_data_for_research: boolean | null
+          show_practice_history: boolean | null
+          show_streak_to_friends: boolean | null
+          show_techniques_to_friends: boolean | null
           updated_at: string | null
         }
         Insert: {
@@ -95,6 +145,11 @@ export type Database = {
           id: string
           name?: string | null
           profile_preferences?: Json | null
+          profile_visibility?: string | null
+          share_health_data_for_research?: boolean | null
+          show_practice_history?: boolean | null
+          show_streak_to_friends?: boolean | null
+          show_techniques_to_friends?: boolean | null
           updated_at?: string | null
         }
         Update: {
@@ -102,6 +157,11 @@ export type Database = {
           id?: string
           name?: string | null
           profile_preferences?: Json | null
+          profile_visibility?: string | null
+          share_health_data_for_research?: boolean | null
+          show_practice_history?: boolean | null
+          show_streak_to_friends?: boolean | null
+          show_techniques_to_friends?: boolean | null
           updated_at?: string | null
         }
         Relationships: []
@@ -189,6 +249,15 @@ export type Database = {
       calculate_mastery_increase: {
         Args: { duration_minutes: number }
         Returns: number
+      }
+      get_user_profile_stats: {
+        Args: { profile_user_id: string }
+        Returns: {
+          current_streak: number
+          recent_techniques: Json
+          total_minutes: number
+          total_sessions: number
+        }[]
       }
       update_mastery_after_session: {
         Args: {
