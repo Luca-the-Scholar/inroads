@@ -356,14 +356,13 @@ export function TimerView() {
               <Select value={selectedTechniqueId} onValueChange={setSelectedTechniqueId}>
                 <SelectTrigger className="min-h-[52px] text-base focus-visible:ring-2 focus-visible:ring-ring">
                   <SelectValue>
-                    {selectedTechnique ? (
-                      <div className="text-left">
-                        <div className="font-semibold">{selectedTechnique.name}</div>
-                        <div className="text-xs text-muted-foreground">{selectedTechnique.tradition}</div>
+                    {selectedTechnique && (
+                      <div className="flex flex-col items-start w-full overflow-visible">
+                        <div className="font-semibold truncate-none w-full">{selectedTechnique.name}</div>
+                        <div className="text-xs text-muted-foreground truncate-none">{selectedTechnique.tradition}</div>
                       </div>
-                    ) : (
-                      "Choose a technique"
                     )}
+                    {!selectedTechnique && "Choose a technique"}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="bg-popover z-50 max-h-[300px]">
