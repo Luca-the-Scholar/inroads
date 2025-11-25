@@ -324,16 +324,16 @@ export function TimerView() {
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => setManualEntry(false)}
-            className={`px-6 py-3 rounded-lg transition-colors min-h-[44px] ${
-              !manualEntry ? 'bg-primary text-primary-foreground' : 'bg-accent text-muted-foreground'
+            className={`px-6 py-3 rounded-lg transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+              !manualEntry ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground hover:bg-secondary/80'
             }`}
           >
             Timer
           </button>
           <button
             onClick={() => setManualEntry(true)}
-            className={`px-6 py-3 rounded-lg transition-colors min-h-[44px] ${
-              manualEntry ? 'bg-primary text-primary-foreground' : 'bg-accent text-muted-foreground'
+            className={`px-6 py-3 rounded-lg transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+              manualEntry ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground hover:bg-secondary/80'
             }`}
           >
             Manual Entry
