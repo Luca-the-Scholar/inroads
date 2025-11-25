@@ -12,7 +12,7 @@ export function BottomNav({ activeView, onViewChange }: BottomNavProps) {
         {/* Centered prominent timer button */}
         <button
           onClick={() => onViewChange('timer')}
-          className={`absolute left-1/2 -translate-x-1/2 -top-8 flex flex-col items-center gap-1 px-6 py-4 rounded-2xl transition-all shadow-2xl ${
+          className={`absolute left-1/2 -translate-x-1/2 -top-8 flex flex-col items-center gap-1 px-6 py-4 rounded-2xl transition-all shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
             activeView === 'timer'
               ? 'bg-primary text-primary-foreground scale-110'
               : 'bg-primary/90 text-primary-foreground hover:bg-primary hover:scale-105'
@@ -26,7 +26,7 @@ export function BottomNav({ activeView, onViewChange }: BottomNavProps) {
         <div className="flex items-center justify-around px-4 py-3">
           <button
             onClick={() => onViewChange('profile')}
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
+            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
               activeView === 'profile'
                 ? 'text-primary'
                 : 'text-muted-foreground hover:text-foreground'
@@ -38,7 +38,7 @@ export function BottomNav({ activeView, onViewChange }: BottomNavProps) {
 
           <button
             onClick={() => onViewChange('library')}
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
+            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
               activeView === 'library'
                 ? 'text-primary'
                 : 'text-muted-foreground hover:text-foreground'
@@ -53,7 +53,7 @@ export function BottomNav({ activeView, onViewChange }: BottomNavProps) {
 
           <button
             onClick={() => onViewChange('stats')}
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
+            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
               activeView === 'stats'
                 ? 'text-primary'
                 : 'text-muted-foreground hover:text-foreground'
@@ -65,7 +65,7 @@ export function BottomNav({ activeView, onViewChange }: BottomNavProps) {
 
           <button
             onClick={() => onViewChange('settings')}
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
+            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
               activeView === 'settings'
                 ? 'text-primary'
                 : 'text-muted-foreground hover:text-foreground'
