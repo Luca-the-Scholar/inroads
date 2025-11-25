@@ -8,22 +8,8 @@ interface BottomNavProps {
 export function BottomNav({ activeView, onViewChange }: BottomNavProps) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-xl border-t border-border z-50">
-      <div className="relative max-w-2xl mx-auto">
-        {/* Centered prominent timer button */}
-        <button
-          onClick={() => onViewChange('timer')}
-          className={`absolute left-1/2 -translate-x-1/2 -top-8 flex flex-col items-center gap-1 px-6 py-4 rounded-2xl transition-all shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-            activeView === 'timer'
-              ? 'bg-primary text-primary-foreground scale-110'
-              : 'bg-primary/90 text-primary-foreground hover:bg-primary hover:scale-105'
-          }`}
-        >
-          <Timer className="w-7 h-7" />
-          <span className="text-xs font-bold">Timer</span>
-        </button>
-
-        {/* Four horizontal nav items */}
-        <div className="flex items-center justify-around px-4 py-3">
+      <div className="max-w-2xl mx-auto">
+        <div className="flex items-center justify-around px-4 py-3 gap-2">
           <button
             onClick={() => onViewChange('community')}
             className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
@@ -48,8 +34,18 @@ export function BottomNav({ activeView, onViewChange }: BottomNavProps) {
             <span className="text-xs font-medium">Library</span>
           </button>
 
-          {/* Spacer for centered timer */}
-          <div className="w-28" />
+          {/* Emphasized timer button */}
+          <button
+            onClick={() => onViewChange('timer')}
+            className={`flex flex-col items-center gap-1 px-6 py-3 rounded-2xl transition-all shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+              activeView === 'timer'
+                ? 'bg-primary text-primary-foreground scale-105'
+                : 'bg-primary/90 text-primary-foreground hover:bg-primary hover:scale-[1.02]'
+            }`}
+          >
+            <Timer className="w-7 h-7" />
+            <span className="text-xs font-bold">Timer</span>
+          </button>
 
           <button
             onClick={() => onViewChange('stats')}
