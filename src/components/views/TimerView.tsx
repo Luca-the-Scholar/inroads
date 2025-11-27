@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Play, Pause, Square, Check, X } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Play, Pause, Square, Check, X, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useWakeLock } from "@/hooks/use-wake-lock";
 interface Technique {
   id: string;
   name: string;
@@ -20,6 +22,7 @@ export function TimerView() {
   const {
     toast
   } = useToast();
+  const wakeLock = useWakeLock();
   const [techniques, setTechniques] = useState<Technique[]>([]);
   const [selectedTechniqueId, setSelectedTechniqueId] = useState<string>("");
   const [selectedTechnique, setSelectedTechnique] = useState<Technique | null>(null);
@@ -32,6 +35,7 @@ export function TimerView() {
   const [manualEntry, setManualEntry] = useState(false);
   const [manualMinutes, setManualMinutes] = useState("");
   const [instructionsModalOpen, setInstructionsModalOpen] = useState(false);
+  const [showWakeLockWarning, setShowWakeLockWarning] = useState(false);
   const presetDurations = [5, 15, 30, 60];
   useEffect(() => {
     fetchTechniques();
@@ -107,7 +111,7 @@ export function TimerView() {
       console.error("Error fetching mastery:", error);
     }
   };
-  const handleStart = () => {
+  const handleStart = async () => {
     if (!selectedTechniqueId) {
       toast({
         title: "Select a technique",
@@ -116,6 +120,13 @@ export function TimerView() {
       });
       return;
     }
+
+    // Request wake lock to keep screen awake
+    const wakeLockAcquired = await wakeLock.request();
+    if (!wakeLockAcquired && !wakeLock.isSupported) {
+      setShowWakeLockWarning(true);
+    }
+
     setInitialDuration(duration);
     setSecondsLeft(duration * 60);
     setTimerState('running');
@@ -172,7 +183,10 @@ export function TimerView() {
       });
     }
   };
-  const handleReset = () => {
+  const handleReset = async () => {
+    // Release wake lock when timer stops
+    await wakeLock.release();
+    setShowWakeLockWarning(false);
     setTimerState('setup');
     setSecondsLeft(0);
     setMasteryBefore(0);
@@ -267,7 +281,16 @@ export function TimerView() {
   // Full-screen Timer Display
   if (timerState === 'running' || timerState === 'paused') {
     return <div className="fixed inset-0 bg-background z-50 flex flex-col items-center justify-center px-4">
-        <div className="max-w-md w-full space-y-12">
+        <div className="max-w-md w-full space-y-8">
+          {/* Wake Lock Warning */}
+          {showWakeLockWarning && (
+            <Alert className="bg-accent/50 border-accent">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription className="text-sm">
+                For best results, please keep your screen awake during your meditation.
+              </AlertDescription>
+            </Alert>
+          )}
           <div className="text-center space-y-2">
             <p className="text-sm text-muted-foreground">{selectedTechnique?.name}</p>
             <h2 className="text-lg font-semibold text-muted-foreground">
