@@ -88,6 +88,22 @@ export function LibraryView() {
 
   useEffect(() => {
     fetchTechniques();
+    
+    // Refetch when window gains focus (e.g., after adding manual entries elsewhere)
+    const handleFocus = () => {
+      fetchTechniques();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        fetchTechniques();
+      }
+    });
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const fetchTechniques = async () => {
