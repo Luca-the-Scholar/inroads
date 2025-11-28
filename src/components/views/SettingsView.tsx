@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Bell, LogOut, User, Shield, Database, ShieldCheck, Vibrate, Volume2, Sparkles } from "lucide-react";
+import { Bell, LogOut, User, Shield, Database, ShieldCheck, Vibrate, Volume2, Sparkles, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { AdminApprovalPanel } from "@/components/admin/AdminApprovalPanel";
@@ -191,7 +191,22 @@ export function SettingsView() {
     <>
       {/* Flash overlay for testing */}
       {testingFlash && (
-        <div className="fixed inset-0 bg-primary/30 z-[100] pointer-events-none animate-pulse" />
+        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+          <div className="absolute inset-0 bg-primary/20 animate-pulse" />
+          <div className="relative z-10 text-center space-y-6 p-8">
+            <div className="text-4xl font-bold text-foreground animate-pulse">
+              Timer Complete!
+            </div>
+            <Button 
+              onClick={() => setTestingFlash(false)} 
+              size="lg" 
+              className="min-w-[200px] min-h-[56px] text-lg"
+            >
+              <Check className="w-5 h-5 mr-2" />
+              Done
+            </Button>
+          </div>
+        </div>
       )}
       
       <div className="min-h-screen bg-background pb-32">
@@ -358,7 +373,6 @@ export function SettingsView() {
                 size="sm"
                 onClick={() => {
                   setTestingFlash(true);
-                  setTimeout(() => setTestingFlash(false), 500);
                 }}
                 className="w-full"
               >

@@ -175,10 +175,9 @@ export function TimerView() {
     handleReset();
   };
   const handleTimerComplete = async () => {
-    // Visual flash for attention (if enabled)
+    // Visual flash for attention (if enabled) - persists until dismissed
     if (visualFlashEnabled) {
       setShowCompletionFlash(true);
-      setTimeout(() => setShowCompletionFlash(false), 500);
     }
     
     // Play sound twice for better alerting (especially on mobile)
@@ -189,6 +188,10 @@ export function TimerView() {
       vibrate(TIMER_COMPLETE_PATTERN);
     }
     await logSession(initialDuration, false);
+  };
+  
+  const dismissFlash = () => {
+    setShowCompletionFlash(false);
   };
   const logSession = async (minutesPracticed: number, stoppedEarly: boolean) => {
     try {
@@ -278,43 +281,65 @@ export function TimerView() {
     const minutesPracticed = Math.floor((initialDuration * 60 - secondsLeft) / 60);
     const wasCompleted = secondsLeft === 0;
     const masteryGain = masteryAfter - masteryBefore;
-    return <div className="fixed inset-0 bg-background z-50 flex items-center justify-center px-4">
-        <div className="max-w-md w-full space-y-8 text-center animate-fade-in">
-          <div className="w-20 h-20 mx-auto rounded-full bg-primary/20 flex items-center justify-center mb-6">
-            <Check className="w-10 h-10 text-primary" />
+    return (
+      <>
+        {/* Persistent flashing overlay */}
+        {showCompletionFlash && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center">
+            <div className="absolute inset-0 bg-primary/20 animate-pulse" />
+            <div className="relative z-10 text-center space-y-6 p-8">
+              <div className="text-4xl font-bold text-foreground animate-pulse">
+                Session Complete!
+              </div>
+              <Button 
+                onClick={dismissFlash} 
+                size="lg" 
+                className="min-w-[200px] min-h-[56px] text-lg"
+              >
+                <Check className="w-5 h-5 mr-2" />
+                Done
+              </Button>
+            </div>
           </div>
-          
-          <div>
-            <h2 className="text-3xl font-bold mb-2">
-              {wasCompleted ? "Session Complete!" : "Session Ended"}
-            </h2>
-            <p className="text-muted-foreground">
-              {wasCompleted ? `You completed ${minutesPracticed} minutes of practice` : `You practiced for ${minutesPracticed} minutes`}
-            </p>
-          </div>
-
-          <Card className="p-6 space-y-4">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Technique</p>
-              <p className="font-semibold text-lg">{selectedTechnique?.name}</p>
+        )}
+        
+        <div className="fixed inset-0 bg-background z-50 flex items-center justify-center px-4">
+          <div className="max-w-md w-full space-y-8 text-center animate-fade-in">
+            <div className="w-20 h-20 mx-auto rounded-full bg-primary/20 flex items-center justify-center mb-6">
+              <Check className="w-10 h-10 text-primary" />
             </div>
             
-            <div className="pt-4 border-t border-border">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-muted-foreground">Mastery Progress</span>
-                <span className="text-primary font-semibold">+{masteryGain.toFixed(1)}%</span>
+            <div>
+              <h2 className="text-3xl font-bold mb-2">
+                {wasCompleted ? "Session Complete!" : "Session Ended"}
+              </h2>
+              <p className="text-muted-foreground">
+                {wasCompleted ? `You completed ${minutesPracticed} minutes of practice` : `You practiced for ${minutesPracticed} minutes`}
+              </p>
+            </div>
+
+            <Card className="p-6 space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Technique</p>
+                <p className="font-semibold text-lg">{selectedTechnique?.name}</p>
               </div>
-              <div className="flex items-center gap-3">
-                                 <div className="flex-1 text-center">
-                                   <div className="text-2xl font-bold">{masteryBefore.toFixed(0)}%</div>
-                                   <div className="text-sm text-muted-foreground">Before</div>
-                                 </div>
-                <div className="text-muted-foreground">→</div>
-                <div className="flex-1 text-center">
-                                   <div className="text-2xl font-bold text-primary">{masteryAfter.toFixed(0)}%</div>
-                                   <div className="text-sm text-muted-foreground">After</div>
+              
+              <div className="pt-4 border-t border-border">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-muted-foreground">Mastery Progress</span>
+                  <span className="text-primary font-semibold">+{masteryGain.toFixed(1)}%</span>
                 </div>
-              </div>
+                <div className="flex items-center gap-3">
+                                   <div className="flex-1 text-center">
+                                     <div className="text-2xl font-bold">{masteryBefore.toFixed(0)}%</div>
+                                     <div className="text-sm text-muted-foreground">Before</div>
+                                   </div>
+                  <div className="text-muted-foreground">→</div>
+                  <div className="flex-1 text-center">
+                                     <div className="text-2xl font-bold text-primary">{masteryAfter.toFixed(0)}%</div>
+                                     <div className="text-sm text-muted-foreground">After</div>
+                  </div>
+                </div>
             </div>
           </Card>
 
@@ -322,7 +347,9 @@ export function TimerView() {
             Done
           </Button>
         </div>
-      </div>;
+      </div>
+      </>
+    );
   }
 
   // Full-screen Timer Display
