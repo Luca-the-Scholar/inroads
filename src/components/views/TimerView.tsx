@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,8 +14,6 @@ import { useHaptic, TIMER_COMPLETE_PATTERN } from "@/hooks/use-haptic";
 import { useTimerSound, TimerSound, SOUND_LABELS } from "@/hooks/use-timer-sound";
 import { useSpotify } from "@/hooks/use-spotify";
 import { useSpotifySDK } from "@/hooks/use-spotify-sdk";
-import { ManualEntryDialog } from "@/components/timer/ManualEntryDialog";
-import { ManualEntriesView } from "@/components/timer/ManualEntriesView";
 
 interface Technique {
   id: string;
@@ -511,23 +509,6 @@ export function TimerView() {
           >
             Manual Entry
           </button>
-        </div>
-
-        {/* Calendar-based Manual Entry */}
-        <div className="flex items-center justify-center gap-2">
-          <ManualEntryDialog 
-            techniques={techniques.map(t => ({ id: t.id, name: t.name }))} 
-            onEntryAdded={() => {
-              fetchTechniques();
-              if (selectedTechniqueId) fetchCurrentMastery();
-            }} 
-          />
-          <ManualEntriesView 
-            onEntriesChanged={() => {
-              fetchTechniques();
-              if (selectedTechniqueId) fetchCurrentMastery();
-            }} 
-          />
         </div>
 
         {/* Technique Selector */}

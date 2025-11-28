@@ -14,6 +14,8 @@ import {
 import { ChevronDown, Flame, Activity, Heart, Moon, TrendingUp, Footprints, Brain, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { ManualEntryDialog } from "@/components/timer/ManualEntryDialog";
+import { ManualEntriesView } from "@/components/timer/ManualEntriesView";
 
 interface TechniqueData {
   id: string;
@@ -285,6 +287,15 @@ export function StatsView() {
           </TabsList>
 
           <TabsContent value="practice" className="space-y-4">
+            {/* Manual Entry Actions */}
+            <div className="flex items-center justify-end gap-2">
+              <ManualEntryDialog 
+                techniques={techniquesData.map(t => ({ id: t.id, name: t.name }))} 
+                onEntryAdded={fetchData} 
+              />
+              <ManualEntriesView onEntriesChanged={fetchData} />
+            </div>
+
             {/* Summary Stats */}
             <Card className="p-6 bg-gradient-to-br from-primary/10 to-primary/5">
               <h2 className="text-lg font-semibold mb-4">Overall Progress</h2>
