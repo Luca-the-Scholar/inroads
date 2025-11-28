@@ -251,46 +251,44 @@ export function SettingsView() {
         </Card>
 
         {/* Haptic Feedback */}
-        {hapticSupported && (
-          <Card className="p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Vibrate className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-semibold">Haptic Feedback</h2>
-            </div>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="haptic">Vibration on Timer Complete</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Phone vibrates when meditation timer ends
-                  </p>
-                </div>
-                <Switch
-                  id="haptic"
-                  checked={hapticEnabled}
-                  onCheckedChange={(checked) => {
-                    setHapticEnabled(checked);
-                    localStorage.setItem('hapticEnabled', String(checked));
-                    toast({ title: checked ? "Haptic feedback enabled" : "Haptic feedback disabled" });
-                  }}
-                />
+        <Card className="p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Vibrate className="w-5 h-5 text-primary" />
+            <h2 className="text-lg font-semibold">Haptic Feedback</h2>
+          </div>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="haptic">Vibration on Timer Complete</Label>
+                <p className="text-sm text-muted-foreground">
+                  Phone vibrates when meditation timer ends
+                </p>
               </div>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  const success = testVibration();
-                  if (!success) {
-                    toast({ title: "Vibration not available", description: "Your device may not support haptic feedback", variant: "destructive" });
-                  }
+              <Switch
+                id="haptic"
+                checked={hapticEnabled}
+                onCheckedChange={(checked) => {
+                  setHapticEnabled(checked);
+                  localStorage.setItem('hapticEnabled', String(checked));
+                  toast({ title: checked ? "Haptic feedback enabled" : "Haptic feedback disabled" });
                 }}
-                className="w-full"
-              >
-                <Vibrate className="w-4 h-4 mr-2" />
-                Test Vibration
-              </Button>
+              />
             </div>
-          </Card>
-        )}
+            <Button
+              variant="outline"
+              onClick={() => {
+                const success = testVibration();
+                if (!success) {
+                  toast({ title: "Vibration not available", description: "Your device may not support haptic feedback", variant: "destructive" });
+                }
+              }}
+              className="w-full"
+            >
+              <Vibrate className="w-4 h-4 mr-2" />
+              Test Vibration
+            </Button>
+          </div>
+        </Card>
 
         <Separator className="my-6" />
 
