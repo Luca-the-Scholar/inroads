@@ -53,39 +53,42 @@ export function useSpotify() {
     localStorage.setItem(SPOTIFY_ENABLED_KEY, String(value));
   };
 
-  const setSpotifyPlaylistUrl = async (url: string) => {
+  const setSpotifyPlaylistUrl = async (url: string, saveToRecent: boolean = false) => {
     setPlaylistUrl(url);
     
     if (!url) return;
     
-    // Update recent playlists (add to front, remove duplicates, keep max 5)
-    const updatedRecent = [url, ...recentPlaylists.filter(p => p !== url)].slice(0, MAX_RECENT_PLAYLISTS);
-    setRecentPlaylists(updatedRecent);
-    
-    // Save to database
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+    // Only save to recent list and database when explicitly requested
+    if (saveToRecent && isValidPlaylistUrl(url)) {
+      // Update recent playlists (add to front, remove duplicates, keep max 5)
+      const updatedRecent = [url, ...recentPlaylists.filter(p => p !== url)].slice(0, MAX_RECENT_PLAYLISTS);
+      setRecentPlaylists(updatedRecent);
+      
+      // Save to database
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('profile_preferences')
-        .eq('id', user.id)
-        .single();
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('profile_preferences')
+          .eq('id', user.id)
+          .single();
 
-      const currentPrefs = (profile?.profile_preferences as any) || {};
-      const updatedPrefs = { 
-        ...currentPrefs, 
-        spotifyPlaylistUrl: url,
-        recentSpotifyPlaylists: updatedRecent,
-      };
+        const currentPrefs = (profile?.profile_preferences as any) || {};
+        const updatedPrefs = { 
+          ...currentPrefs, 
+          spotifyPlaylistUrl: url,
+          recentSpotifyPlaylists: updatedRecent,
+        };
 
-      await supabase
-        .from('profiles')
-        .update({ profile_preferences: updatedPrefs })
-        .eq('id', user.id);
-    } catch (error) {
-      console.error('Error saving playlist URL:', error);
+        await supabase
+          .from('profiles')
+          .update({ profile_preferences: updatedPrefs })
+          .eq('id', user.id);
+      } catch (error) {
+        console.error('Error saving playlist URL:', error);
+      }
     }
   };
 

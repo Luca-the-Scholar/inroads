@@ -543,13 +543,22 @@ export function SettingsView() {
                     </Select>
                   )}
                   
-                  <Input
-                    id="playlist-url"
-                    placeholder="https://open.spotify.com/playlist/..."
-                    value={playlistUrl}
-                    onChange={(e) => setSpotifyPlaylistUrl(e.target.value)}
-                    className="min-h-[44px]"
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      id="playlist-url"
+                      placeholder="https://open.spotify.com/playlist/..."
+                      value={playlistUrl}
+                      onChange={(e) => setSpotifyPlaylistUrl(e.target.value, false)}
+                      className="min-h-[44px]"
+                    />
+                    <Button 
+                      onClick={() => setSpotifyPlaylistUrl(playlistUrl, true)}
+                      disabled={!playlistUrl || !isValidPlaylistUrl(playlistUrl)}
+                      className="min-h-[44px] px-4"
+                    >
+                      Save
+                    </Button>
+                  </div>
                   {playlistUrl && !isValidPlaylistUrl(playlistUrl) && (
                     <p className="text-xs text-destructive">
                       Please enter a valid Spotify playlist URL
