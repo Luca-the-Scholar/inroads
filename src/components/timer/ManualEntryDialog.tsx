@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { CalendarIcon, Clock, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -22,12 +22,24 @@ interface ManualEntryDialogProps {
   onEntryAdded: () => void;
 }
 
+const LAST_TECHNIQUE_KEY = 'inroads-last-logged-technique';
+
 export function ManualEntryDialog({ techniques, onEntryAdded }: ManualEntryDialogProps) {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState<Date>();
   const [techniqueId, setTechniqueId] = useState<string>('');
   const [minutes, setMinutes] = useState<string>('');
   const [loading, setLoading] = useState(false);
+
+  // Load last used technique when dialog opens
+  useEffect(() => {
+    if (open && techniques.length > 0) {
+      const lastTechnique = localStorage.getItem(LAST_TECHNIQUE_KEY);
+      if (lastTechnique && techniques.some(t => t.id === lastTechnique)) {
+        setTechniqueId(lastTechnique);
+      }
+    }
+  }, [open, techniques]);
 
   const handleSubmit = async () => {
     if (!date || !techniqueId || !minutes) {
@@ -60,10 +72,13 @@ export function ManualEntryDialog({ techniques, onEntryAdded }: ManualEntryDialo
 
       if (error) throw error;
 
+      // Save last used technique for convenience
+      localStorage.setItem(LAST_TECHNIQUE_KEY, techniqueId);
+      
       toast.success('Session logged successfully');
       setOpen(false);
       setDate(undefined);
-      setTechniqueId('');
+      // Keep techniqueId for next entry
       setMinutes('');
       onEntryAdded();
     } catch (error) {
