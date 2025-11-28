@@ -25,15 +25,25 @@ const Index = () => {
     }
   };
 
+  // Force LibraryView to remount when switching to it by using the timestamp as key
+  const [libraryKey, setLibraryKey] = useState(0);
+  
+  const handleViewChange = (view: ViewType) => {
+    if (view === 'library') {
+      setLibraryKey(prev => prev + 1);
+    }
+    setActiveView(view);
+  };
+
   return (
     <>
       {activeView === 'community' && <CommunityView />}
-      {activeView === 'library' && <LibraryView />}
+      {activeView === 'library' && <LibraryView key={libraryKey} />}
       {activeView === 'stats' && <StatsView />}
       {activeView === 'settings' && <SettingsView />}
       {activeView === 'timer' && <TimerView />}
       
-      <BottomNav activeView={activeView} onViewChange={setActiveView} />
+      <BottomNav activeView={activeView} onViewChange={handleViewChange} />
     </>
   );
 };
