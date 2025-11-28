@@ -288,7 +288,7 @@ export function StatsView() {
 
           <TabsContent value="practice" className="space-y-4">
             {/* Manual Entry Actions */}
-            <div className="flex items-center justify-end gap-2">
+            <div className="flex items-center justify-center gap-2">
               <ManualEntryDialog 
                 techniques={techniquesData.map(t => ({ id: t.id, name: t.name }))} 
                 onEntryAdded={fetchData} 
