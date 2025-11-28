@@ -127,6 +127,7 @@ export type Database = {
       }
       mastery_scores: {
         Row: {
+          cumulative_effective_minutes: number | null
           id: string
           last_decay_applied_at: string | null
           last_practiced_at: string | null
@@ -137,6 +138,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          cumulative_effective_minutes?: number | null
           id?: string
           last_decay_applied_at?: string | null
           last_practiced_at?: string | null
@@ -147,6 +149,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          cumulative_effective_minutes?: number | null
           id?: string
           last_decay_applied_at?: string | null
           last_practiced_at?: string | null
@@ -248,8 +251,10 @@ export type Database = {
       }
       profiles: {
         Row: {
+          consecutive_missed_days: number | null
           created_at: string | null
           id: string
+          last_meditation_date: string | null
           name: string | null
           profile_preferences: Json | null
           profile_visibility: string | null
@@ -260,8 +265,10 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          consecutive_missed_days?: number | null
           created_at?: string | null
           id: string
+          last_meditation_date?: string | null
           name?: string | null
           profile_preferences?: Json | null
           profile_visibility?: string | null
@@ -272,8 +279,10 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          consecutive_missed_days?: number | null
           created_at?: string | null
           id?: string
+          last_meditation_date?: string | null
           name?: string | null
           profile_preferences?: Json | null
           profile_visibility?: string | null
@@ -289,6 +298,7 @@ export type Database = {
         Row: {
           created_at: string | null
           duration_minutes: number
+          effective_minutes: number | null
           id: string
           manual_entry: boolean | null
           session_date: string | null
@@ -298,6 +308,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           duration_minutes: number
+          effective_minutes?: number | null
           id?: string
           manual_entry?: boolean | null
           session_date?: string | null
@@ -307,6 +318,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           duration_minutes?: number
+          effective_minutes?: number | null
           id?: string
           manual_entry?: boolean | null
           session_date?: string | null
@@ -470,7 +482,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_manual_session: {
+        Args: {
+          p_duration_minutes: number
+          p_session_date: string
+          p_technique_id: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       apply_daily_decay: { Args: never; Returns: undefined }
+      calculate_duration_multiplier: {
+        Args: { duration_minutes: number }
+        Returns: number
+      }
+      calculate_mastery_from_minutes: {
+        Args: { cumulative_minutes: number }
+        Returns: number
+      }
       calculate_mastery_increase: {
         Args: { duration_minutes: number }
         Returns: number
@@ -494,6 +523,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      recalculate_technique_mastery: {
+        Args: { p_technique_id: string; p_user_id: string }
+        Returns: undefined
       }
       update_mastery_after_session: {
         Args: {
