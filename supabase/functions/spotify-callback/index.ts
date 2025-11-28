@@ -14,10 +14,13 @@ serve(async (req) => {
   try {
     const url = new URL(req.url);
     const code = url.searchParams.get('code');
-    const state = url.searchParams.get('state');
+    const stateRaw = url.searchParams.get('state');
     const error = url.searchParams.get('error');
+    
+    // Decode the state - it was URL-encoded when sent
+    const state = stateRaw ? decodeURIComponent(stateRaw) : null;
 
-    console.log('Spotify callback received:', { code: !!code, state, error });
+    console.log('Spotify callback received:', { code: !!code, stateRaw, state, error });
 
     if (error) {
       console.error('Spotify auth error:', error);
