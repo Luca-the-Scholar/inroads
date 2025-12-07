@@ -80,6 +80,7 @@ export function CommunityView() {
   const [loading, setLoading] = useState(true);
   const [selectedFriend, setSelectedFriend] = useState<MockFriend | null>(null);
   const [friendCalendarMonth, setFriendCalendarMonth] = useState(new Date());
+  const [selectedFriendDate, setSelectedFriendDate] = useState<Date | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -214,7 +215,10 @@ export function CommunityView() {
           {/* Back Button */}
           <Button 
             variant="ghost" 
-            onClick={() => setSelectedFriend(null)}
+            onClick={() => {
+              setSelectedFriend(null);
+              setSelectedFriendDate(null);
+            }}
             className="gap-2 -ml-2"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -305,19 +309,24 @@ export function CommunityView() {
                   const isFuture = isAfter(day, today);
                   const isTooOld = isBefore(day, thirtyDaysAgo);
                   const isOutOfRange = isFuture || isTooOld;
+                  const isSelected = selectedFriendDate && isSameDay(day, selectedFriendDate);
 
                   return (
-                    <div
+                    <button
                       key={dateKey}
+                      onClick={() => !isOutOfRange && setSelectedFriendDate(day)}
+                      disabled={isOutOfRange}
                       className={`
-                        aspect-square rounded-md flex items-center justify-center
-                        ${isOutOfRange ? "bg-muted/20 text-muted-foreground/40" : getHeatmapColor(minutes)}
+                        aspect-square rounded-md flex items-center justify-center transition-all
+                        ${isOutOfRange ? "bg-muted/20 text-muted-foreground/40 cursor-not-allowed" : getHeatmapColor(minutes)}
                         ${isToday ? "ring-2 ring-primary ring-offset-1 ring-offset-background" : ""}
+                        ${isSelected ? "ring-2 ring-foreground" : ""}
+                        ${!isOutOfRange ? "hover:opacity-80" : ""}
                       `}
                       title={isOutOfRange ? format(day, "MMM d") : `${format(day, "MMM d")}: ${minutes}m`}
                     >
                       <span className="text-xs">{format(day, "d")}</span>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -334,6 +343,45 @@ export function CommunityView() {
                 </div>
                 <span>More</span>
               </div>
+            </Card>
+          )}
+
+          {/* Selected Date Sessions */}
+          {selectedFriend.showHistory && selectedFriendDate && (
+            <Card className="p-4">
+              <h3 className="font-semibold mb-3">
+                {format(selectedFriendDate, "MMMM d, yyyy")}
+              </h3>
+              {(() => {
+                const dateKey = format(selectedFriendDate, "yyyy-MM-dd");
+                const sessionsForDate = selectedFriend.practiceDays.filter(s => s.date === dateKey);
+                
+                if (sessionsForDate.length === 0) {
+                  return (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No sessions on this day
+                    </p>
+                  );
+                }
+                
+                return (
+                  <div className="space-y-2">
+                    {sessionsForDate.map((session, idx) => (
+                      <div
+                        key={`${session.date}-${idx}`}
+                        className="flex items-center justify-between p-3 bg-accent/30 rounded-lg"
+                      >
+                        <div>
+                          <div className="font-medium">{session.technique}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {session.minutes} minutes
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </Card>
           )}
 
@@ -475,7 +523,10 @@ export function CommunityView() {
                 <Card 
                   key={friend.id} 
                   className="p-4 cursor-pointer hover:bg-accent/50 transition-colors"
-                  onClick={() => setSelectedFriend(friend)}
+                  onClick={() => {
+                    setSelectedFriend(friend);
+                    setSelectedFriendDate(null);
+                  }}
                 >
                   <div className="flex items-center gap-4">
                     <Avatar className="w-12 h-12">
