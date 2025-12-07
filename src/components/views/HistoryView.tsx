@@ -83,6 +83,15 @@ export function HistoryView() {
     }
   };
 
+  // Helper to parse date string without timezone shift
+  const parseSessionDate = (dateStr: string): Date => {
+    // session_date comes as "YYYY-MM-DD" or "YYYY-MM-DDTHH:MM:SS"
+    // Extract just the date part and create a local date
+    const datePart = dateStr.split('T')[0];
+    const [year, month, day] = datePart.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  };
+
   const calculateStreak = (sessionData: Session[]) => {
     if (sessionData.length === 0) {
       setCurrentStreak(0);
@@ -90,7 +99,7 @@ export function HistoryView() {
     }
 
     const uniqueDates = new Set(
-      sessionData.map((s) => format(new Date(s.session_date), "yyyy-MM-dd"))
+      sessionData.map((s) => format(parseSessionDate(s.session_date), "yyyy-MM-dd"))
     );
 
     const today = format(new Date(), "yyyy-MM-dd");
@@ -120,7 +129,7 @@ export function HistoryView() {
   const sessionsByDate = useMemo(() => {
     const map = new Map<string, number>();
     sessions.forEach((session) => {
-      const dateKey = format(new Date(session.session_date), "yyyy-MM-dd");
+      const dateKey = format(parseSessionDate(session.session_date), "yyyy-MM-dd");
       map.set(dateKey, (map.get(dateKey) || 0) + session.duration_minutes);
     });
     return map;
@@ -154,7 +163,7 @@ export function HistoryView() {
   // Get sessions for selected date
   const selectedDateSessions = selectedDate
     ? sessions.filter((s) =>
-        isSameDay(new Date(s.session_date), selectedDate)
+        isSameDay(parseSessionDate(s.session_date), selectedDate)
       )
     : [];
 
@@ -340,7 +349,7 @@ export function HistoryView() {
                       {session.technique_name}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {format(new Date(session.session_date), "MMM d, yyyy")}
+                      {format(parseSessionDate(session.session_date), "MMM d, yyyy")}
                     </div>
                   </div>
                   <div className="text-sm font-semibold">
