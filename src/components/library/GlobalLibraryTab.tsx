@@ -4,8 +4,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Copy, Globe, Book, MapPin, Bookmark } from "lucide-react";
+import { Copy, Globe, Book, MapPin, Bookmark, Trash2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface GlobalTechnique {
@@ -35,10 +36,32 @@ export function GlobalLibraryTab() {
   const [selectedTechnique, setSelectedTechnique] = useState<GlobalTechnique | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [techniqueToDelete, setTechniqueToDelete] = useState<GlobalTechnique | null>(null);
 
   useEffect(() => {
     fetchGlobalTechniques();
+    checkAdminStatus();
   }, []);
+
+  const checkAdminStatus = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+      
+      setIsAdmin(!!data);
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+    }
+  };
 
   const fetchGlobalTechniques = async () => {
     try {
@@ -155,6 +178,41 @@ export function GlobalLibraryTab() {
   const openDetails = (technique: GlobalTechnique) => {
     setSelectedTechnique(technique);
     setDetailsOpen(true);
+  };
+
+  const handleDeleteClick = (technique: GlobalTechnique) => {
+    setTechniqueToDelete(technique);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!techniqueToDelete) return;
+    
+    try {
+      const { error } = await supabase
+        .from('global_techniques')
+        .delete()
+        .eq('id', techniqueToDelete.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Technique deleted",
+        description: `${techniqueToDelete.name} has been removed from the global library.`,
+      });
+      
+      setTechniques(prev => prev.filter(t => t.id !== techniqueToDelete.id));
+      setDetailsOpen(false);
+    } catch (error: any) {
+      toast({
+        title: "Error deleting technique",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setTechniqueToDelete(null);
+    }
   };
 
   const getAuthorName = (technique: GlobalTechnique) => {
@@ -328,10 +386,37 @@ export function GlobalLibraryTab() {
               <p className="text-xs text-muted-foreground text-center">
                 <strong>Save</strong> keeps attribution (read-only) • <strong>Duplicate</strong> creates an editable copy
               </p>
+              {isAdmin && (
+                <Button
+                  onClick={() => handleDeleteClick(selectedTechnique)}
+                  variant="destructive"
+                  className="w-full"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete from Global Library
+                </Button>
+              )}
             </div>
           </DialogContent>
         </Dialog>
       )}
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Technique</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{techniqueToDelete?.name}" from the global library? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
