@@ -4,61 +4,59 @@
 
 @layer base {
   :root {
-    /* Vibrant Night Sky Theme */
-    --background: 222 47% 6%;
+    /* Vibrant Night Sky Theme - Contemplative & Exciting */
+    --background: 222 47% 5%;
     --foreground: 210 40% 98%;
     
-    /* Cards with subtle blue tint */
-    --card: 222 40% 10%;
+    /* Cards with warm undertone */
+    --card: 222 35% 9%;
     --card-foreground: 210 40% 98%;
     
     /* Popovers/dropdowns */
-    --popover: 222 45% 12%;
+    --popover: 222 40% 11%;
     --popover-foreground: 210 40% 98%;
     
-    /* Primary: Deep vibrant blue */
-    --primary: 210 75% 50%;
+    /* Primary: Vibrant blue */
+    --primary: 210 80% 55%;
     --primary-foreground: 0 0% 100%;
     
-    /* Secondary: Muted blue-gray */
-    --secondary: 220 30% 18%;
+    /* Secondary: Deep blue-gray */
+    --secondary: 220 25% 14%;
     --secondary-foreground: 210 40% 98%;
     
     /* Muted elements */
-    --muted: 220 25% 16%;
-    --muted-foreground: 215 20% 60%;
+    --muted: 220 20% 12%;
+    --muted-foreground: 215 20% 55%;
     
     /* Accent: Warm sunset orange */
-    --accent: 28 85% 55%;
+    --accent: 25 90% 55%;
     --accent-foreground: 0 0% 100%;
     
     /* Destructive */
-    --destructive: 0 85% 60%;
+    --destructive: 0 80% 55%;
     --destructive-foreground: 0 0% 100%;
     
-    /* Borders with subtle blue glow */
-    --border: 220 30% 22%;
-    --input: 220 30% 20%;
-    --ring: 210 75% 50%;
+    /* Borders - subtle and soft */
+    --border: 220 20% 18%;
+    --input: 220 20% 15%;
+    --ring: 210 80% 55%;
     
-    --radius: 0.75rem;
+    --radius: 1rem;
     
     /* Chart colors */
-    --chart-1: 210 75% 50%;
-    --chart-2: 195 80% 45%;
-    --chart-3: 28 85% 55%;
-    --chart-4: 35 90% 50%;
-    --chart-5: 180 60% 45%;
-    
-    /* Custom gradient colors */
-    --gradient-blue-start: 210 80% 55%;
-    --gradient-blue-end: 220 70% 40%;
-    --gradient-orange-start: 28 90% 60%;
-    --gradient-orange-end: 20 85% 45%;
+    --chart-1: 210 80% 55%;
+    --chart-2: 195 85% 50%;
+    --chart-3: 25 90% 55%;
+    --chart-4: 35 95% 55%;
+    --chart-5: 175 65% 45%;
     
     /* Glow effects */
     --glow-blue: 210 100% 60%;
-    --glow-orange: 28 100% 60%;
+    --glow-orange: 25 100% 60%;
+    
+    /* Success */
+    --success: 150 70% 45%;
+    --success-foreground: 0 0% 100%;
   }
 
   * {
@@ -66,55 +64,87 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
     background-image: 
-      radial-gradient(ellipse at top, hsl(220 60% 12%) 0%, transparent 50%),
-      radial-gradient(ellipse at bottom right, hsl(28 50% 8% / 0.3) 0%, transparent 40%);
+      radial-gradient(ellipse at 20% 0%, hsl(220 50% 10% / 0.8) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, hsl(25 40% 8% / 0.4) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 50%, hsl(222 47% 5%) 0%, hsl(222 47% 3%) 100%);
     background-attachment: fixed;
+    min-height: 100vh;
   }
 }
 
 @layer components {
-  /* Vibrant gradient text */
+  /* Soft card with glow on hover */
+  .card-interactive {
+    @apply transition-all duration-300 ease-out;
+  }
+  .card-interactive:hover {
+    @apply border-primary/30;
+    box-shadow: 0 8px 32px hsl(var(--primary) / 0.1);
+    transform: translateY(-2px);
+  }
+  .card-interactive:active {
+    transform: translateY(0);
+  }
+  
+  /* Gradient text */
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
   }
   
   /* Glowing borders */
   .border-glow {
-    @apply border border-primary/30;
-    box-shadow: 0 0 20px hsl(var(--glow-blue) / 0.15);
+    @apply border border-primary/40;
+    box-shadow: 0 0 24px hsl(var(--glow-blue) / 0.15), inset 0 1px 0 hsl(var(--primary) / 0.1);
   }
   
   .border-glow-accent {
-    @apply border border-accent/30;
-    box-shadow: 0 0 20px hsl(var(--glow-orange) / 0.15);
+    @apply border border-accent/40;
+    box-shadow: 0 0 24px hsl(var(--glow-orange) / 0.15), inset 0 1px 0 hsl(var(--accent) / 0.1);
   }
   
-  /* Card with subtle gradient */
-  .card-gradient {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--card)) 0%,
-      hsl(220 35% 8%) 100%
-    );
+  /* Floating action button */
+  .fab {
+    @apply fixed bottom-24 right-4 rounded-full p-4 shadow-xl transition-all duration-200;
+    @apply bg-gradient-to-br from-accent to-accent/80 text-accent-foreground;
+    box-shadow: 0 8px 32px hsl(var(--glow-orange) / 0.4);
+  }
+  .fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 40px hsl(var(--glow-orange) / 0.5);
+  }
+  .fab:active {
+    transform: scale(1.05);
   }
   
-  /* Interactive hover glow */
-  .hover-glow {
-    @apply transition-all duration-300;
-  }
-  .hover-glow:hover {
-    box-shadow: 0 0 30px hsl(var(--glow-blue) / 0.2);
+  /* Stats card */
+  .stats-card {
+    @apply rounded-2xl p-5 border border-primary/20;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.12) 0%, hsl(var(--primary) / 0.04) 100%);
   }
   
-  /* Accent button glow */
-  .btn-accent-glow {
-    @apply bg-accent text-accent-foreground;
-    box-shadow: 0 4px 20px hsl(var(--glow-orange) / 0.3);
+  /* Calendar day cell */
+  .calendar-day {
+    @apply aspect-square rounded-xl flex items-center justify-center text-sm font-medium transition-all duration-200;
   }
-  .btn-accent-glow:hover {
-    box-shadow: 0 6px 30px hsl(var(--glow-orange) / 0.4);
+  .calendar-day:hover:not(:disabled) {
+    @apply bg-primary/20;
+  }
+  .calendar-day.active {
+    @apply ring-2 ring-primary ring-offset-2 ring-offset-background;
+  }
+  
+  /* Mobile touch targets */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* Streak flame */
+  .streak-flame {
+    @apply text-orange-400;
+    filter: drop-shadow(0 0 8px hsl(25 100% 50% / 0.5));
   }
 }
 
@@ -128,20 +158,41 @@
     scrollbar-width: none;
   }
   
-  /* Shimmer animation for loading states */
-  .shimmer {
-    background: linear-gradient(
-      90deg,
-      hsl(var(--muted)) 0%,
-      hsl(var(--muted-foreground) / 0.1) 50%,
-      hsl(var(--muted)) 100%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
+  /* Safe area padding for mobile */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
   }
   
-  @keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0);
   }
+  
+  /* Smooth transitions */
+  .transition-smooth {
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  /* Glass effect */
+  .glass {
+    @apply backdrop-blur-xl bg-background/80;
+  }
+}
+
+/* Pulse animation for stars */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.2); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 3s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }

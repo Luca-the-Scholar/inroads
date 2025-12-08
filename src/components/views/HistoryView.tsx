@@ -148,12 +148,12 @@ export function HistoryView() {
   }, [sessionsByDate]);
 
   const getHeatmapColor = (minutes: number) => {
-    if (minutes === 0) return "bg-muted/50";
+    if (minutes === 0) return "bg-muted/30";
     const intensity = Math.min(minutes / maxMinutes, 1);
-    if (intensity < 0.25) return "bg-primary/25";
-    if (intensity < 0.5) return "bg-primary/50";
-    if (intensity < 0.75) return "bg-primary/75";
-    return "bg-primary";
+    if (intensity < 0.25) return "bg-gradient-to-br from-primary/20 to-primary/30";
+    if (intensity < 0.5) return "bg-gradient-to-br from-primary/40 to-primary/50";
+    if (intensity < 0.75) return "bg-gradient-to-br from-primary/60 to-accent/40";
+    return "bg-gradient-to-br from-primary to-accent";
   };
 
   const totalMinutes = sessions.reduce((sum, s) => sum + s.duration_minutes, 0);
@@ -177,27 +177,27 @@ export function HistoryView() {
 
   return (
     <div className="min-h-screen bg-background pb-32">
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
+      <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
         {/* Summary Stats */}
-        <Card className="p-6 bg-gradient-to-br from-primary/10 to-primary/5">
-          <div className="grid grid-cols-2 gap-4">
+        <div className="stats-card">
+          <div className="grid grid-cols-2 gap-6">
             <div className="text-center">
-              <div className="flex items-center justify-center gap-2">
-                <Flame className="w-6 h-6 text-orange-500" />
-                <span className="text-3xl font-bold text-primary">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <Flame className="w-7 h-7 streak-flame animate-pulse-soft" />
+                <span className="text-4xl font-bold text-gradient">
                   {currentStreak}
                 </span>
               </div>
-              <div className="text-sm text-muted-foreground">Day Streak</div>
+              <div className="text-sm text-muted-foreground font-medium">Day Streak</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary">
-                {totalHours}h {remainingMinutes}m
+              <div className="text-4xl font-bold text-foreground mb-1">
+                {totalHours}<span className="text-2xl text-muted-foreground">h</span> {remainingMinutes}<span className="text-2xl text-muted-foreground">m</span>
               </div>
-              <div className="text-sm text-muted-foreground">Total Time</div>
+              <div className="text-sm text-muted-foreground font-medium">Total Time</div>
             </div>
           </div>
-        </Card>
+        </div>
 
         {/* Manual Entry Actions */}
         <div className="flex items-center justify-center gap-2">
@@ -209,33 +209,35 @@ export function HistoryView() {
         </div>
 
         {/* Calendar Heatmap */}
-        <Card className="p-4">
-          <div className="flex items-center justify-between mb-4">
+        <Card className="p-5">
+          <div className="flex items-center justify-between mb-5">
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+              className="h-9 w-9"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-5 w-5" />
             </Button>
-            <h3 className="font-semibold">
+            <h3 className="font-semibold text-lg">
               {format(currentMonth, "MMMM yyyy")}
             </h3>
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+              className="h-9 w-9"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-5 w-5" />
             </Button>
           </div>
 
           {/* Day headers */}
-          <div className="grid grid-cols-7 gap-1 mb-2">
+          <div className="grid grid-cols-7 gap-1.5 mb-2">
             {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
               <div
                 key={i}
-                className="text-center text-xs text-muted-foreground font-medium"
+                className="text-center text-xs text-muted-foreground font-semibold py-1"
               >
                 {day}
               </div>
@@ -243,7 +245,7 @@ export function HistoryView() {
           </div>
 
           {/* Calendar grid */}
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-7 gap-1.5">
             {/* Empty cells for days before month starts */}
             {Array.from({ length: getDay(startOfMonth(currentMonth)) }).map(
               (_, i) => (
@@ -262,29 +264,31 @@ export function HistoryView() {
                   key={dateKey}
                   onClick={() => setSelectedDate(day)}
                   className={`
-                    aspect-square rounded-md transition-all
+                    aspect-square rounded-lg transition-all duration-200 flex items-center justify-center
                     ${getHeatmapColor(minutes)}
-                    ${isToday ? "ring-2 ring-primary ring-offset-1 ring-offset-background" : ""}
-                    ${isSelected ? "ring-2 ring-foreground" : ""}
-                    hover:opacity-80
+                    ${isToday ? "ring-2 ring-accent ring-offset-2 ring-offset-background" : ""}
+                    ${isSelected ? "ring-2 ring-foreground scale-110" : ""}
+                    hover:scale-105 active:scale-95
                   `}
                   title={`${format(day, "MMM d")}: ${minutes}m`}
                 >
-                  <span className="text-xs">{format(day, "d")}</span>
+                  <span className={`text-xs font-medium ${minutes > 0 ? 'text-white' : 'text-muted-foreground'}`}>
+                    {format(day, "d")}
+                  </span>
                 </button>
               );
             })}
           </div>
 
           {/* Legend */}
-          <div className="flex items-center justify-center gap-2 mt-4 text-xs text-muted-foreground">
+          <div className="flex items-center justify-center gap-3 mt-5 text-xs text-muted-foreground">
             <span>Less</span>
-            <div className="flex gap-1">
-              <div className="w-3 h-3 rounded bg-muted/50" />
-              <div className="w-3 h-3 rounded bg-primary/25" />
-              <div className="w-3 h-3 rounded bg-primary/50" />
-              <div className="w-3 h-3 rounded bg-primary/75" />
-              <div className="w-3 h-3 rounded bg-primary" />
+            <div className="flex gap-1.5">
+              <div className="w-4 h-4 rounded-md bg-muted/30" />
+              <div className="w-4 h-4 rounded-md bg-gradient-to-br from-primary/20 to-primary/30" />
+              <div className="w-4 h-4 rounded-md bg-gradient-to-br from-primary/40 to-primary/50" />
+              <div className="w-4 h-4 rounded-md bg-gradient-to-br from-primary/60 to-accent/40" />
+              <div className="w-4 h-4 rounded-md bg-gradient-to-br from-primary to-accent" />
             </div>
             <span>More</span>
           </div>
@@ -292,23 +296,23 @@ export function HistoryView() {
 
         {/* Selected Date Sessions */}
         {selectedDate && (
-          <Card className="p-4">
-            <h3 className="font-semibold mb-3">
+          <Card className="p-5 animate-fade-in">
+            <h3 className="font-semibold text-lg mb-4">
               {format(selectedDate, "MMMM d, yyyy")}
             </h3>
             {selectedDateSessions.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">
+              <p className="text-sm text-muted-foreground text-center py-6">
                 No sessions on this day
               </p>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {selectedDateSessions.map((session) => (
                   <div
                     key={session.id}
-                    className="flex items-center justify-between p-3 bg-accent/30 rounded-lg"
+                    className="flex items-center justify-between p-4 bg-primary/10 rounded-xl border border-primary/20"
                   >
                     <div>
-                      <div className="font-medium">{session.technique_name}</div>
+                      <div className="font-semibold text-foreground">{session.technique_name}</div>
                       <div className="text-sm text-muted-foreground">
                         {session.duration_minutes} minutes
                         {session.manual_entry && " • Manual entry"}
