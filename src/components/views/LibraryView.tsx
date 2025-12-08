@@ -395,7 +395,7 @@ export function LibraryView() {
 
       {/* Technique Detail Dialog */}
       <Dialog open={!!detailTechnique} onOpenChange={() => { setDetailTechnique(null); setIsEditing(false); }}>
-        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>
               {isEditing ? "Edit Technique" : detailTechnique?.name}
