@@ -7,7 +7,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -31,7 +31,7 @@ export function ManualEntryDialog({ techniques, onEntryAdded }: ManualEntryDialo
   const [duration, setDuration] = useState(20);
   const [loading, setLoading] = useState(false);
   
-  const presetDurations = [5, 15, 30, 60];
+  const presetDurations = [10, 30, 45, 60];
 
   // Load last used technique when dialog opens
   useEffect(() => {
@@ -153,7 +153,7 @@ export function ManualEntryDialog({ techniques, onEntryAdded }: ManualEntryDialo
             </Select>
           </div>
 
-          {/* Duration Slider */}
+          {/* Duration Selection */}
           <div className="space-y-3">
             <Label>Duration: {duration} minutes</Label>
             
@@ -172,14 +172,23 @@ export function ManualEntryDialog({ techniques, onEntryAdded }: ManualEntryDialo
               ))}
             </div>
 
-            <Slider
-              value={[duration]}
-              onValueChange={([val]) => setDuration(val)}
-              min={1}
-              max={120}
-              step={1}
-              className="w-full"
-            />
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Custom:</span>
+              <Input
+                type="number"
+                min={1}
+                max={480}
+                value={duration}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  if (!isNaN(val) && val >= 1 && val <= 480) {
+                    setDuration(val);
+                  }
+                }}
+                className="w-24"
+              />
+              <span className="text-sm text-muted-foreground">minutes</span>
+            </div>
           </div>
 
           {/* Submit Button */}

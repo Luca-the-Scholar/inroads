@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -42,7 +43,7 @@ export function TimerView() {
   const [screenWakeLockEnabled, setScreenWakeLockEnabled] = useState(true);
   const [showCompletionFlash, setShowCompletionFlash] = useState(false);
   
-  const presetDurations = [5, 15, 30, 60];
+  const presetDurations = [10, 30, 45, 60];
 
   // Load timer alert preferences from localStorage
   useEffect(() => {
@@ -408,7 +409,7 @@ export function TimerView() {
             Duration: {duration} minutes
           </h2>
           
-          <div className="flex gap-2 mb-6">
+          <div className="flex gap-2 mb-4">
             {presetDurations.map(preset => (
               <Button 
                 key={preset}
@@ -421,14 +422,26 @@ export function TimerView() {
             ))}
           </div>
 
-          <Slider
-            value={[duration]}
-            onValueChange={([val]) => setDuration(val)}
-            min={1}
-            max={120}
-            step={1}
-            className="w-full"
-          />
+          <div className="flex items-center gap-2">
+            <Label htmlFor="custom-duration" className="text-sm text-muted-foreground whitespace-nowrap">
+              Custom:
+            </Label>
+            <Input
+              id="custom-duration"
+              type="number"
+              min={1}
+              max={480}
+              value={duration}
+              onChange={(e) => {
+                const val = parseInt(e.target.value, 10);
+                if (!isNaN(val) && val >= 1 && val <= 480) {
+                  setDuration(val);
+                }
+              }}
+              className="w-24"
+            />
+            <span className="text-sm text-muted-foreground">minutes</span>
+          </div>
         </Card>
 
         {/* Sound Selection */}
