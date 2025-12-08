@@ -505,7 +505,7 @@ export function TimerView() {
 
       {/* Instructions Modal */}
       <Dialog open={instructionsModalOpen} onOpenChange={setInstructionsModalOpen}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>{selectedTechnique?.name}</DialogTitle>
             {selectedTechnique?.original_author_name && (
