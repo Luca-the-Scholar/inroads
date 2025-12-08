@@ -1,6 +1,6 @@
 import { useCallback, useRef } from 'react';
 
-export type TimerSound = 'none' | 'bowl-singing' | 'bowl-struck-1' | 'bowl-struck-2' | 'bowl-struck-3' | 'bowl-struck-4';
+export type TimerSound = 'none' | 'bowl-singing' | 'bowl-struck-1' | 'bowl-struck-2' | 'bowl-struck-3' | 'bowl-struck-4' | 'gong' | 'bell-1' | 'bell-2';
 
 export const SOUND_LABELS: Record<TimerSound, string> = {
   'none': 'None',
@@ -9,6 +9,9 @@ export const SOUND_LABELS: Record<TimerSound, string> = {
   'bowl-struck-2': 'Bowl Strike 2',
   'bowl-struck-3': 'Bowl Strike 3',
   'bowl-struck-4': 'Bowl Strike 4',
+  'gong': 'Gong',
+  'bell-1': 'Small Bell 1',
+  'bell-2': 'Small Bell 2',
 };
 
 const SOUND_FILES: Record<Exclude<TimerSound, 'none'>, string> = {
@@ -17,6 +20,9 @@ const SOUND_FILES: Record<Exclude<TimerSound, 'none'>, string> = {
   'bowl-struck-2': '/sounds/tibetan-bowl-struck-2.wav',
   'bowl-struck-3': '/sounds/tibetan-bowl-struck-3.wav',
   'bowl-struck-4': '/sounds/tibetan-bowl-struck-4.wav',
+  'gong': '/sounds/gong-sweet.wav',
+  'bell-1': '/sounds/small-bell-1.wav',
+  'bell-2': '/sounds/small-bell-2.wav',
 };
 
 export function useTimerSound() {
