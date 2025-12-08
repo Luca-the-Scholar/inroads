@@ -30,7 +30,7 @@ export function ManualEntriesView({ onEntriesChanged }: ManualEntriesViewProps) 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editMinutes, setEditMinutes] = useState<string>('');
 
-  const fetchManualSessions = async () => {
+  const fetchSessions = async () => {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -40,7 +40,6 @@ export function ManualEntriesView({ onEntriesChanged }: ManualEntriesViewProps) 
         .from('sessions')
         .select('*')
         .eq('user_id', user.id)
-        .eq('manual_entry', true)
         .order('session_date', { ascending: false });
 
       if (sessionsError) throw sessionsError;
@@ -70,15 +69,12 @@ export function ManualEntriesView({ onEntriesChanged }: ManualEntriesViewProps) 
 
   useEffect(() => {
     if (open) {
-      fetchManualSessions();
+      fetchSessions();
     }
   }, [open]);
 
-  const handleDelete = async (sessionId: string, techniqueId: string) => {
+  const handleDelete = async (sessionId: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
       const { error } = await supabase
         .from('sessions')
         .delete()
@@ -86,14 +82,8 @@ export function ManualEntriesView({ onEntriesChanged }: ManualEntriesViewProps) 
 
       if (error) throw error;
 
-      // Recalculate mastery for this technique
-      await supabase.rpc('recalculate_technique_mastery', {
-        p_user_id: user.id,
-        p_technique_id: techniqueId,
-      });
-
       toast.success('Session deleted');
-      fetchManualSessions();
+      fetchSessions();
       onEntriesChanged();
     } catch (error) {
       console.error('Error deleting session:', error);
@@ -119,33 +109,19 @@ export function ManualEntriesView({ onEntriesChanged }: ManualEntriesViewProps) 
     }
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Calculate new effective minutes
-      const multiplier = calculateMultiplier(newMinutes);
-      const effectiveMinutes = newMinutes * multiplier;
-
       const { error } = await supabase
         .from('sessions')
         .update({ 
           duration_minutes: newMinutes,
-          effective_minutes: effectiveMinutes,
         })
         .eq('id', session.id);
 
       if (error) throw error;
 
-      // Recalculate mastery
-      await supabase.rpc('recalculate_technique_mastery', {
-        p_user_id: user.id,
-        p_technique_id: session.technique_id,
-      });
-
       toast.success('Session updated');
       setEditingId(null);
       setEditMinutes('');
-      fetchManualSessions();
+      fetchSessions();
       onEntriesChanged();
     } catch (error) {
       console.error('Error updating session:', error);
@@ -153,26 +129,19 @@ export function ManualEntriesView({ onEntriesChanged }: ManualEntriesViewProps) 
     }
   };
 
-  // New formula: multiplier = 1 + slope × (minutes - 30) where slope = (1.8 - 1.0) / 29
-  const calculateMultiplier = (mins: number): number => {
-    if (mins <= 30) return 1.0;
-    const slope = (1.8 - 1.0) / 29;
-    return 1.0 + slope * (mins - 30);
-  };
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="sm" className="gap-2">
           <CalendarDays className="h-4 w-4" />
-          View Manual Entries
+          View Past Sessions
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CalendarDays className="h-5 w-5" />
-            Manual Session Entries
+            Past Sessions
           </DialogTitle>
         </DialogHeader>
         
@@ -181,7 +150,7 @@ export function ManualEntriesView({ onEntriesChanged }: ManualEntriesViewProps) 
             <div className="py-8 text-center text-muted-foreground">Loading...</div>
           ) : sessions.length === 0 ? (
             <div className="py-8 text-center text-muted-foreground">
-              No manual entries yet
+              No sessions yet
             </div>
           ) : (
             <div className="space-y-3">
@@ -208,9 +177,9 @@ export function ManualEntriesView({ onEntriesChanged }: ManualEntriesViewProps) 
                       ) : (
                         <span>{session.duration_minutes} min</span>
                       )}
-                      {session.effective_minutes && (
-                        <span className="text-xs">
-                          ({Number(session.effective_minutes).toFixed(1)} effective)
+                      {session.manual_entry && (
+                        <span className="text-xs text-muted-foreground/70">
+                          (manual)
                         </span>
                       )}
                     </div>
@@ -256,13 +225,13 @@ export function ManualEntriesView({ onEntriesChanged }: ManualEntriesViewProps) 
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete Session?</AlertDialogTitle>
                               <AlertDialogDescription>
-                                This will remove this session and recalculate your mastery score for this technique.
+                                This will permanently remove this session from your history.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction 
-                                onClick={() => handleDelete(session.id, session.technique_id)}
+                                onClick={() => handleDelete(session.id)}
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                               >
                                 Delete

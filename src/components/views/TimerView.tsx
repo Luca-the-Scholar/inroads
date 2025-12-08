@@ -180,6 +180,7 @@ export function TimerView() {
         user_id: user.id,
         technique_id: selectedTechniqueId,
         duration_minutes: minutesPracticed,
+        session_date: new Date().toISOString(),
         manual_entry: false
       });
 
