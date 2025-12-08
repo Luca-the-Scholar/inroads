@@ -6,6 +6,18 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Sparkles } from "lucide-react";
+import { z } from "zod";
+
+const loginSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(1, "Password is required"),
+});
+
+const signupSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  displayName: z.string().min(1, "Display name is required").max(50, "Display name must be 50 characters or less"),
+});
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -13,14 +25,45 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string; displayName?: string }>({});
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
     setLoading(true);
 
     try {
+      // Validate inputs
+      if (isLogin) {
+        const result = loginSchema.safeParse({ email, password });
+        if (!result.success) {
+          const fieldErrors: typeof errors = {};
+          result.error.errors.forEach((err) => {
+            if (err.path[0]) {
+              fieldErrors[err.path[0] as keyof typeof errors] = err.message;
+            }
+          });
+          setErrors(fieldErrors);
+          setLoading(false);
+          return;
+        }
+      } else {
+        const result = signupSchema.safeParse({ email, password, displayName: displayName.trim() });
+        if (!result.success) {
+          const fieldErrors: typeof errors = {};
+          result.error.errors.forEach((err) => {
+            if (err.path[0]) {
+              fieldErrors[err.path[0] as keyof typeof errors] = err.message;
+            }
+          });
+          setErrors(fieldErrors);
+          setLoading(false);
+          return;
+        }
+      }
+
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -30,9 +73,6 @@ export default function Auth() {
         toast({ title: "Welcome back!" });
         navigate("/");
       } else {
-        if (!displayName.trim()) {
-          throw new Error("Display name is required");
-        }
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -91,36 +131,45 @@ export default function Auth() {
 
         <form onSubmit={handleAuth} className="space-y-4">
           {!isLogin && (
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Input
                 type="text"
                 placeholder="Display Name"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                required
                 className="bg-background/50"
+                aria-invalid={!!errors.displayName}
               />
+              {errors.displayName && (
+                <p className="text-sm text-destructive">{errors.displayName}</p>
+              )}
             </div>
           )}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <Input
               type="email"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
               className="bg-background/50"
+              aria-invalid={!!errors.email}
             />
+            {errors.email && (
+              <p className="text-sm text-destructive">{errors.email}</p>
+            )}
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1">
             <Input
               type="password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
               className="bg-background/50"
+              aria-invalid={!!errors.password}
             />
+            {errors.password && (
+              <p className="text-sm text-destructive">{errors.password}</p>
+            )}
           </div>
           <Button
             type="submit"
@@ -133,7 +182,10 @@ export default function Auth() {
 
         <div className="text-center">
           <button
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setErrors({});
+            }}
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             {isLogin
