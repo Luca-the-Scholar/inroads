@@ -13,178 +13,173 @@ import { useHaptic } from "@/hooks/use-haptic";
 import { useTimerSound, TimerSound, SOUND_LABELS } from "@/hooks/use-timer-sound";
 import { ProfileEditDialog } from "@/components/settings/ProfileEditDialog";
 import { AdminPanel } from "@/components/settings/AdminPanel";
-
 export function SettingsView() {
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [notifications, setNotifications] = useState(false);
   const [dailyReminder, setDailyReminder] = useState(false);
   const [saving, setSaving] = useState(false);
-  
+
   // Edit dialog states
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editType, setEditType] = useState<"name" | "email" | "password">("name");
-  
+
   // Privacy settings
   // Granular privacy settings only
   const [streakVisibility, setStreakVisibility] = useState<'all' | 'friends' | 'private'>('friends');
   const [techniqueVisibility, setTechniqueVisibility] = useState<'all' | 'friends' | 'private'>('friends');
   const [historyVisibility, setHistoryVisibility] = useState<'all' | 'friends' | 'private'>('friends');
   const [sessionFeedVisibility, setSessionFeedVisibility] = useState<'all' | 'friends' | 'none'>('friends');
-  
+
   // Timer alert settings
   const [hapticEnabled, setHapticEnabled] = useState(true);
   const [screenWakeLock, setScreenWakeLock] = useState(true);
   const [visualFlash, setVisualFlash] = useState(true);
   const [testingFlash, setTestingFlash] = useState(false);
-  
+
   // Admin state
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminPanelOpen, setAdminPanelOpen] = useState(false);
-  
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const navigate = useNavigate();
-  const { testVibration } = useHaptic();
-  const { playSound, unlockAudio } = useTimerSound();
-
+  const {
+    testVibration
+  } = useHaptic();
+  const {
+    playSound,
+    unlockAudio
+  } = useTimerSound();
   useEffect(() => {
     fetchSettings();
     // Load timer alert preferences
     const hapticStored = localStorage.getItem('hapticEnabled');
     if (hapticStored !== null) setHapticEnabled(hapticStored === 'true');
-    
     const wakeLockStored = localStorage.getItem('screenWakeLock');
     if (wakeLockStored !== null) setScreenWakeLock(wakeLockStored === 'true');
-    
     const flashStored = localStorage.getItem('visualFlash');
     if (flashStored !== null) setVisualFlash(flashStored === 'true');
   }, []);
-
   const fetchSettings = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
       if (!user) return;
-
       setUserEmail(user.email || "");
 
       // Check if user is admin
-      const { data: adminCheck } = await supabase.rpc("has_role", {
+      const {
+        data: adminCheck
+      } = await supabase.rpc("has_role", {
         _user_id: user.id,
         _role: "admin"
       });
       setIsAdmin(!!adminCheck);
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("name, profile_preferences, profile_visibility, show_streak_to_friends, show_techniques_to_friends, show_practice_history, share_sessions_in_feed")
-        .eq("id", user.id)
-        .single();
-
+      const {
+        data: profile
+      } = await supabase.from("profiles").select("name, profile_preferences, profile_visibility, show_streak_to_friends, show_techniques_to_friends, show_practice_history, share_sessions_in_feed").eq("id", user.id).single();
       if (profile) {
         setUserName(profile.name || "");
         const prefs = profile.profile_preferences as any;
         setNotifications(prefs?.notifications || false);
         setDailyReminder(prefs?.dailyReminder || false);
         // Profile visibility removed - using granular settings only
-        setStreakVisibility((profile.show_streak_to_friends as any) || 'friends');
-        setTechniqueVisibility((profile.show_techniques_to_friends as any) || 'friends');
-        setHistoryVisibility((profile.show_practice_history as any) || 'friends');
-        setSessionFeedVisibility((profile.share_sessions_in_feed as any) || 'friends');
+        setStreakVisibility(profile.show_streak_to_friends as any || 'friends');
+        setTechniqueVisibility(profile.show_techniques_to_friends as any || 'friends');
+        setHistoryVisibility(profile.show_practice_history as any || 'friends');
+        setSessionFeedVisibility(profile.share_sessions_in_feed as any || 'friends');
       }
     } catch (error: any) {
       console.error("Error loading settings:", error);
     }
   };
-
   const openEditDialog = (type: "name" | "email" | "password") => {
     setEditType(type);
     setEditDialogOpen(true);
   };
-
   const handleToggleSetting = async (key: string, value: boolean) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
       if (!user) return;
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("profile_preferences")
-        .eq("id", user.id)
-        .single();
-
-      const prefs = (profile?.profile_preferences as any) || {};
+      const {
+        data: profile
+      } = await supabase.from("profiles").select("profile_preferences").eq("id", user.id).single();
+      const prefs = profile?.profile_preferences as any || {};
       prefs[key] = value;
-
-      const { error } = await supabase
-        .from("profiles")
-        .upsert({ id: user.id, profile_preferences: prefs });
-
+      const {
+        error
+      } = await supabase.from("profiles").upsert({
+        id: user.id,
+        profile_preferences: prefs
+      });
       if (error) throw error;
-
       if (key === "notifications") setNotifications(value);
       if (key === "dailyReminder") setDailyReminder(value);
-
-      toast({ title: "Setting updated!" });
+      toast({
+        title: "Setting updated!"
+      });
     } catch (error: any) {
       toast({
         title: "Error updating setting",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const handlePrivacyUpdate = async (field: string, value: any) => {
     setSaving(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
       if (!user) return;
-
-      const { error } = await supabase
-        .from("profiles")
-        .update({ [field]: value })
-        .eq("id", user.id);
-
+      const {
+        error
+      } = await supabase.from("profiles").update({
+        [field]: value
+      }).eq("id", user.id);
       if (error) throw error;
-
-      toast({ title: "Privacy setting updated" });
+      toast({
+        title: "Privacy setting updated"
+      });
     } catch (error: any) {
       toast({
         title: "Error updating privacy setting",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setSaving(false);
     }
   };
-
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
   };
-
-  return (
-    <>
+  return <>
       {/* Flash overlay for testing */}
-      {testingFlash && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+      {testingFlash && <div className="fixed inset-0 z-[100] flex items-center justify-center">
           <div className="absolute inset-0 bg-primary/20 animate-pulse" />
           <div className="relative z-10 text-center space-y-6 p-8">
             <div className="text-4xl font-bold text-foreground animate-pulse">
               Timer Complete!
             </div>
-            <Button 
-              onClick={() => setTestingFlash(false)} 
-              size="lg" 
-              className="min-w-[200px] min-h-[56px] text-lg"
-            >
+            <Button onClick={() => setTestingFlash(false)} size="lg" className="min-w-[200px] min-h-[56px] text-lg">
               <Check className="w-5 h-5 mr-2" />
               Done
             </Button>
           </div>
-        </div>
-      )}
+        </div>}
       
       <div className="min-h-screen bg-background pb-32">
         <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
@@ -201,12 +196,7 @@ export function SettingsView() {
                   <Label className="text-muted-foreground text-sm">Display Name</Label>
                   <p className="text-foreground font-medium truncate">{userName || "Not set"}</p>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => openEditDialog("name")}
-                  className="shrink-0"
-                >
+                <Button variant="ghost" size="icon" onClick={() => openEditDialog("name")} className="shrink-0">
                   <Pencil className="w-4 h-4" />
                 </Button>
               </div>
@@ -219,12 +209,7 @@ export function SettingsView() {
                   </Label>
                   <p className="text-foreground font-medium truncate">{userEmail}</p>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => openEditDialog("email")}
-                  className="shrink-0"
-                >
+                <Button variant="ghost" size="icon" onClick={() => openEditDialog("email")} className="shrink-0">
                   <Pencil className="w-4 h-4" />
                 </Button>
               </div>
@@ -237,12 +222,7 @@ export function SettingsView() {
                   </Label>
                   <p className="text-foreground font-medium">••••••••</p>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => openEditDialog("password")}
-                  className="shrink-0"
-                >
+                <Button variant="ghost" size="icon" onClick={() => openEditDialog("password")} className="shrink-0">
                   <Pencil className="w-4 h-4" />
                 </Button>
               </div>
@@ -250,13 +230,7 @@ export function SettingsView() {
           </Card>
 
           {/* Edit Profile Dialog */}
-          <ProfileEditDialog
-            open={editDialogOpen}
-            onOpenChange={setEditDialogOpen}
-            editType={editType}
-            currentValue={editType === "name" ? userName : editType === "email" ? userEmail : ""}
-            onSuccess={fetchSettings}
-          />
+          <ProfileEditDialog open={editDialogOpen} onOpenChange={setEditDialogOpen} editType={editType} currentValue={editType === "name" ? userName : editType === "email" ? userEmail : ""} onSuccess={fetchSettings} />
 
           {/* Notifications */}
           <Card className="p-6">
@@ -272,13 +246,7 @@ export function SettingsView() {
                     Receive notifications about your practice
                   </p>
                 </div>
-                <Switch
-                  id="notifications"
-                  checked={notifications}
-                  onCheckedChange={(checked) =>
-                    handleToggleSetting("notifications", checked)
-                  }
-                />
+                <Switch id="notifications" checked={notifications} onCheckedChange={checked => handleToggleSetting("notifications", checked)} />
               </div>
               <div className="flex items-center justify-between">
                 <div>
@@ -287,13 +255,7 @@ export function SettingsView() {
                     Remind me to practice each day
                   </p>
                 </div>
-                <Switch
-                  id="daily-reminder"
-                  checked={dailyReminder}
-                  onCheckedChange={(checked) =>
-                    handleToggleSetting("dailyReminder", checked)
-                  }
-                />
+                <Switch id="daily-reminder" checked={dailyReminder} onCheckedChange={checked => handleToggleSetting("dailyReminder", checked)} />
               </div>
             </div>
           </Card>
@@ -315,26 +277,21 @@ export function SettingsView() {
                       Phone vibrates when timer ends
                     </p>
                   </div>
-                  <Switch
-                    id="haptic"
-                    checked={hapticEnabled}
-                    onCheckedChange={(checked) => {
-                      setHapticEnabled(checked);
-                      localStorage.setItem('hapticEnabled', String(checked));
-                    }}
-                  />
+                  <Switch id="haptic" checked={hapticEnabled} onCheckedChange={checked => {
+                  setHapticEnabled(checked);
+                  localStorage.setItem('hapticEnabled', String(checked));
+                }} />
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const success = testVibration();
-                    if (!success) {
-                      toast({ title: "Vibration not available", description: "Your device may not support haptic feedback", variant: "destructive" });
-                    }
-                  }}
-                  className="w-full"
-                >
+                <Button variant="outline" size="sm" onClick={() => {
+                const success = testVibration();
+                if (!success) {
+                  toast({
+                    title: "Vibration not available",
+                    description: "Your device may not support haptic feedback",
+                    variant: "destructive"
+                  });
+                }
+              }} className="w-full">
                   <Vibrate className="w-4 h-4 mr-2" />
                   Test Vibration
                 </Button>
@@ -349,21 +306,12 @@ export function SettingsView() {
                       Screen flashes when timer completes
                     </p>
                   </div>
-                  <Switch
-                    id="visual-flash"
-                    checked={visualFlash}
-                    onCheckedChange={(checked) => {
-                      setVisualFlash(checked);
-                      localStorage.setItem('visualFlash', String(checked));
-                    }}
-                  />
+                  <Switch id="visual-flash" checked={visualFlash} onCheckedChange={checked => {
+                  setVisualFlash(checked);
+                  localStorage.setItem('visualFlash', String(checked));
+                }} />
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setTestingFlash(true)}
-                  className="w-full"
-                >
+                <Button variant="outline" size="sm" onClick={() => setTestingFlash(true)} className="w-full">
                   <Sparkles className="w-4 h-4 mr-2" />
                   Test Visual Flash
                 </Button>
@@ -377,14 +325,10 @@ export function SettingsView() {
                     Prevents screen from sleeping during meditation
                   </p>
                 </div>
-                <Switch
-                  id="wake-lock"
-                  checked={screenWakeLock}
-                  onCheckedChange={(checked) => {
-                    setScreenWakeLock(checked);
-                    localStorage.setItem('screenWakeLock', String(checked));
-                  }}
-                />
+                <Switch id="wake-lock" checked={screenWakeLock} onCheckedChange={checked => {
+                setScreenWakeLock(checked);
+                localStorage.setItem('screenWakeLock', String(checked));
+              }} />
               </div>
             </div>
           </Card>
@@ -402,13 +346,10 @@ export function SettingsView() {
                 <p className="text-sm text-muted-foreground">
                   Who can see your meditation streak
                 </p>
-                <Select 
-                  value={streakVisibility} 
-                  onValueChange={(value: 'all' | 'friends' | 'private') => {
-                    setStreakVisibility(value);
-                    handlePrivacyUpdate('show_streak_to_friends', value);
-                  }}
-                >
+                <Select value={streakVisibility} onValueChange={(value: 'all' | 'friends' | 'private') => {
+                setStreakVisibility(value);
+                handlePrivacyUpdate('show_streak_to_friends', value);
+              }}>
                   <SelectTrigger className="min-h-[44px]">
                     <SelectValue />
                   </SelectTrigger>
@@ -425,13 +366,10 @@ export function SettingsView() {
                 <p className="text-sm text-muted-foreground">
                   Who can see your favorite technique
                 </p>
-                <Select 
-                  value={techniqueVisibility} 
-                  onValueChange={(value: 'all' | 'friends' | 'private') => {
-                    setTechniqueVisibility(value);
-                    handlePrivacyUpdate('show_techniques_to_friends', value);
-                  }}
-                >
+                <Select value={techniqueVisibility} onValueChange={(value: 'all' | 'friends' | 'private') => {
+                setTechniqueVisibility(value);
+                handlePrivacyUpdate('show_techniques_to_friends', value);
+              }}>
                   <SelectTrigger className="min-h-[44px]">
                     <SelectValue />
                   </SelectTrigger>
@@ -448,13 +386,10 @@ export function SettingsView() {
                 <p className="text-sm text-muted-foreground">
                   Who can see your practice calendar
                 </p>
-                <Select 
-                  value={historyVisibility} 
-                  onValueChange={(value: 'all' | 'friends' | 'private') => {
-                    setHistoryVisibility(value);
-                    handlePrivacyUpdate('show_practice_history', value);
-                  }}
-                >
+                <Select value={historyVisibility} onValueChange={(value: 'all' | 'friends' | 'private') => {
+                setHistoryVisibility(value);
+                handlePrivacyUpdate('show_practice_history', value);
+              }}>
                   <SelectTrigger className="min-h-[44px]">
                     <SelectValue />
                   </SelectTrigger>
@@ -471,13 +406,10 @@ export function SettingsView() {
                 <p className="text-sm text-muted-foreground">
                   Share your sessions in the community activity feed
                 </p>
-                <Select 
-                  value={sessionFeedVisibility} 
-                  onValueChange={(value: 'all' | 'friends' | 'none') => {
-                    setSessionFeedVisibility(value);
-                    handlePrivacyUpdate('share_sessions_in_feed', value);
-                  }}
-                >
+                <Select value={sessionFeedVisibility} onValueChange={(value: 'all' | 'friends' | 'none') => {
+                setSessionFeedVisibility(value);
+                handlePrivacyUpdate('share_sessions_in_feed', value);
+              }}>
                   <SelectTrigger className="min-h-[44px]">
                     <SelectValue />
                   </SelectTrigger>
@@ -501,20 +433,11 @@ export function SettingsView() {
               Help us continue developing and improving the meditation experience.
             </p>
             <div className="space-y-2">
-              <Button 
-                variant="outline" 
-                className="w-full min-h-[44px]"
-                onClick={() => window.open('https://ko-fi.com/', '_blank')}
-              >
-                <Heart className="w-4 h-4 mr-2" />
-                Support on Ko-fi
-                <ExternalLink className="w-4 h-4 ml-2" />
-              </Button>
-              <Button 
-                variant="secondary" 
-                className="w-full min-h-[44px]"
-                onClick={() => toast({ title: "Coming Soon!", description: "Premium features are in development." })}
-              >
+              
+              <Button variant="secondary" className="w-full min-h-[44px]" onClick={() => toast({
+              title: "Coming Soon!",
+              description: "Premium features are in development."
+            })}>
                 <Sparkles className="w-4 h-4 mr-2" />
                 Join Premium Waitlist
               </Button>
@@ -522,8 +445,7 @@ export function SettingsView() {
           </Card>
 
           {/* Admin Panel - Only visible for admins */}
-          {isAdmin && (
-            <Card className="p-6 border-primary/20">
+          {isAdmin && <Card className="p-6 border-primary/20">
               <div className="flex items-center gap-3 mb-4">
                 <Crown className="w-5 h-5 text-primary" />
                 <h2 className="text-lg font-semibold">Administration</h2>
@@ -531,32 +453,22 @@ export function SettingsView() {
               <p className="text-sm text-muted-foreground mb-4">
                 Manage user roles and approve technique submissions.
               </p>
-              <Button 
-                variant="outline" 
-                className="w-full min-h-[44px]"
-                onClick={() => setAdminPanelOpen(true)}
-              >
+              <Button variant="outline" className="w-full min-h-[44px]" onClick={() => setAdminPanelOpen(true)}>
                 <Shield className="w-4 h-4 mr-2" />
                 Open Admin Panel
               </Button>
-            </Card>
-          )}
+            </Card>}
 
           <AdminPanel open={adminPanelOpen} onOpenChange={setAdminPanelOpen} />
 
           <Separator />
 
           {/* Sign Out */}
-          <Button
-            variant="outline"
-            className="w-full min-h-[44px]"
-            onClick={handleSignOut}
-          >
+          <Button variant="outline" className="w-full min-h-[44px]" onClick={handleSignOut}>
             <LogOut className="w-4 h-4 mr-2" />
             Sign Out
           </Button>
         </div>
       </div>
-    </>
-  );
+    </>;
 }
