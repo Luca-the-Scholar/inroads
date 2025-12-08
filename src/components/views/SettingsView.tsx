@@ -6,13 +6,14 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Bell, LogOut, User, Shield, Vibrate, Volume2, Sparkles, Check, Heart, ExternalLink, Pencil, Mail, Lock, Crown } from "lucide-react";
+import { Bell, LogOut, User, Shield, Vibrate, Sparkles, Check, Heart, Pencil, Mail, Lock, Crown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useHaptic } from "@/hooks/use-haptic";
-import { useTimerSound, TimerSound, SOUND_LABELS } from "@/hooks/use-timer-sound";
 import { ProfileEditDialog } from "@/components/settings/ProfileEditDialog";
 import { AdminPanel } from "@/components/settings/AdminPanel";
+import { PremiumModal } from "@/components/settings/PremiumModal";
+
 export function SettingsView() {
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
@@ -40,6 +41,9 @@ export function SettingsView() {
   // Admin state
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminPanelOpen, setAdminPanelOpen] = useState(false);
+  
+  // Premium modal state
+  const [premiumModalOpen, setPremiumModalOpen] = useState(false);
   const {
     toast
   } = useToast();
@@ -47,10 +51,7 @@ export function SettingsView() {
   const {
     testVibration
   } = useHaptic();
-  const {
-    playSound,
-    unlockAudio
-  } = useTimerSound();
+  
   useEffect(() => {
     fetchSettings();
     // Load timer alert preferences
@@ -423,26 +424,39 @@ export function SettingsView() {
             </div>
           </Card>
 
-          {/* Support */}
-          <Card className="p-6">
+          {/* Premium */}
+          <Card className="p-6 border-accent/20">
             <div className="flex items-center gap-3 mb-4">
-              <Heart className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-semibold">Support the App</h2>
+              <Sparkles className="w-5 h-5 text-accent" />
+              <h2 className="text-lg font-semibold text-gradient">Contempla+</h2>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Help us continue developing and improving the meditation experience.
+              Unlock premium features and enhance your meditation practice.
             </p>
-            <div className="space-y-2">
-              
-              <Button variant="secondary" className="w-full min-h-[44px]" onClick={() => toast({
-              title: "Coming Soon!",
-              description: "Premium features are in development."
-            })}>
-                <Sparkles className="w-4 h-4 mr-2" />
-                Join Premium Waitlist
-              </Button>
-            </div>
+            <Button 
+              className="w-full min-h-[44px] bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70" 
+              onClick={async () => {
+                try {
+                  const { data: { user } } = await supabase.auth.getUser();
+                  if (user) {
+                    await supabase.from("subscription_interest").insert({
+                      user_id: user.id,
+                      action_type: "settings_click",
+                      metadata: { source: "settings_card" }
+                    });
+                  }
+                } catch (error) {
+                  console.error("Error tracking click:", error);
+                }
+                setPremiumModalOpen(true);
+              }}
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              Get Contempla+
+            </Button>
           </Card>
+          
+          <PremiumModal open={premiumModalOpen} onOpenChange={setPremiumModalOpen} />
 
           {/* Admin Panel - Only visible for admins */}
           {isAdmin && <Card className="p-6 border-primary/20">
