@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Check, X, Clock } from "lucide-react";
+import { Check, X, Clock, ShieldAlert } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface PendingTechnique {
@@ -30,10 +30,42 @@ export function AdminApprovalPanel() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
-    fetchPendingTechniques();
+    checkAdminRole();
   }, []);
+
+  const checkAdminRole = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setIsAdmin(false);
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase.rpc('has_role', {
+        _user_id: user.id,
+        _role: 'admin'
+      });
+
+      if (error) {
+        console.error('Error checking admin role:', error);
+        setIsAdmin(false);
+      } else {
+        setIsAdmin(data === true);
+        if (data === true) {
+          fetchPendingTechniques();
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('Error checking admin role:', error);
+      setIsAdmin(false);
+    }
+    setLoading(false);
+  };
 
   const fetchPendingTechniques = async () => {
     try {
@@ -99,7 +131,18 @@ export function AdminApprovalPanel() {
   };
 
   if (loading) {
-    return <div className="text-center py-8 text-muted-foreground">Loading submissions...</div>;
+    return <div className="text-center py-8 text-muted-foreground">Loading...</div>;
+  }
+
+  // Show access denied if not an admin
+  if (isAdmin === false) {
+    return (
+      <Card className="p-8 text-center">
+        <ShieldAlert className="w-12 h-12 mx-auto mb-3 text-destructive" />
+        <h3 className="font-semibold text-lg mb-2">Access Denied</h3>
+        <p className="text-muted-foreground">You do not have permission to view this page.</p>
+      </Card>
+    );
   }
 
   if (pendingTechniques.length === 0) {
