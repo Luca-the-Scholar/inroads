@@ -234,53 +234,61 @@ export function LibraryView() {
   return (
     <div className="min-h-screen bg-background pb-32">
       <div className="max-w-2xl mx-auto px-4 py-6">
-        <Tabs defaultValue="personal" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="personal">My Library</TabsTrigger>
-            <TabsTrigger value="global">Global Library</TabsTrigger>
+        <Tabs defaultValue="personal" className="space-y-5">
+          <TabsList className="grid w-full grid-cols-2 h-12 rounded-xl bg-muted/50 p-1">
+            <TabsTrigger value="personal" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow-sm font-semibold">
+              My Library
+            </TabsTrigger>
+            <TabsTrigger value="global" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow-sm font-semibold">
+              Global Library
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="personal" className="space-y-4">
+          <TabsContent value="personal" className="space-y-5">
             {techniques.length === 0 ? (
               <Card className="p-8 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Plus className="h-8 w-8 text-primary" />
+                </div>
                 <h3 className="text-lg font-semibold mb-2">No techniques yet</h3>
-                <p className="text-muted-foreground mb-4">
+                <p className="text-muted-foreground mb-6">
                   Add your first technique to get started
                 </p>
-                <Button onClick={() => setAddModalOpen(true)}>
+                <Button variant="accent" onClick={() => setAddModalOpen(true)}>
                   <Plus className="mr-2 h-4 w-4" />
                   Add Technique
                 </Button>
               </Card>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {Object.entries(groupedTechniques).map(([tradition, techs]) => (
                   <div key={tradition} className="space-y-3">
-                    <h2 className="text-base font-semibold px-1">{tradition}</h2>
+                    <h2 className="text-sm font-semibold text-primary uppercase tracking-wide px-1">{tradition}</h2>
                     {techs.map((technique) => (
                       <Card 
                         key={technique.id} 
-                        className="p-4 cursor-pointer hover:bg-accent/50 transition-colors"
+                        className="p-4 cursor-pointer card-interactive"
                         onClick={() => setDetailTechnique(technique)}
                       >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <h3 className="font-semibold">{technique.name}</h3>
+                              <h3 className="font-semibold text-foreground truncate">{technique.name}</h3>
                               {technique.is_favorite && (
-                                <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                                <Star className="h-4 w-4 fill-accent text-accent shrink-0" />
                               )}
                             </div>
                             {technique.original_author_name && (
-                              <p className="text-xs text-primary">by {technique.original_author_name}</p>
+                              <p className="text-xs text-accent mt-0.5">by {technique.original_author_name}</p>
                             )}
-                            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
                               {technique.instructions}
                             </p>
                           </div>
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="icon"
+                            className="shrink-0 text-muted-foreground hover:text-destructive"
                             onClick={(e) => {
                               e.stopPropagation();
                               openDeleteDialog(technique);
@@ -297,9 +305,9 @@ export function LibraryView() {
             )}
           </TabsContent>
 
-          <TabsContent value="global" className="space-y-4">
-            <div className="flex justify-end mb-4">
-              <Button onClick={() => setUploadDialogOpen(true)}>
+          <TabsContent value="global" className="space-y-5">
+            <div className="flex justify-end">
+              <Button variant="accent" onClick={() => setUploadDialogOpen(true)}>
                 <Upload className="h-4 w-4 mr-2" />
                 Contribute Technique
               </Button>
@@ -309,10 +317,11 @@ export function LibraryView() {
         </Tabs>
       </div>
 
-      {/* Add floating action button */}
+      {/* Floating action button */}
       <button
         onClick={() => setAddModalOpen(true)}
-        className="fixed bottom-24 right-6 bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:scale-110 transition-transform z-40"
+        className="fab"
+        aria-label="Add technique"
       >
         <Plus className="h-6 w-6" />
       </button>
