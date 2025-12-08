@@ -7,7 +7,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -28,8 +28,10 @@ export function ManualEntryDialog({ techniques, onEntryAdded }: ManualEntryDialo
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState<Date>();
   const [techniqueId, setTechniqueId] = useState<string>('');
-  const [minutes, setMinutes] = useState<string>('');
+  const [duration, setDuration] = useState(20);
   const [loading, setLoading] = useState(false);
+  
+  const presetDurations = [5, 15, 30, 60];
 
   // Load last used technique when dialog opens
   useEffect(() => {
@@ -42,14 +44,13 @@ export function ManualEntryDialog({ techniques, onEntryAdded }: ManualEntryDialo
   }, [open, techniques]);
 
   const handleSubmit = async () => {
-    if (!date || !techniqueId || !minutes) {
+    if (!date || !techniqueId) {
       toast.error('Please fill in all fields');
       return;
     }
 
-    const durationMinutes = parseInt(minutes, 10);
-    if (isNaN(durationMinutes) || durationMinutes <= 0) {
-      toast.error('Please enter a valid duration');
+    if (duration <= 0) {
+      toast.error('Please select a valid duration');
       return;
     }
 
@@ -63,11 +64,10 @@ export function ManualEntryDialog({ techniques, onEntryAdded }: ManualEntryDialo
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Simple insert without RPC (no mastery calculation)
       const { error } = await supabase.from('sessions').insert({
         user_id: user.id,
         technique_id: techniqueId,
-        duration_minutes: durationMinutes,
+        duration_minutes: duration,
         session_date: format(date, 'yyyy-MM-dd'),
         manual_entry: true,
       });
@@ -80,7 +80,7 @@ export function ManualEntryDialog({ techniques, onEntryAdded }: ManualEntryDialo
       toast.success('Session logged successfully');
       setOpen(false);
       setDate(undefined);
-      setMinutes('');
+      setDuration(20);
       onEntryAdded();
     } catch (error) {
       console.error('Error adding manual entry:', error);
@@ -153,22 +153,39 @@ export function ManualEntryDialog({ techniques, onEntryAdded }: ManualEntryDialo
             </Select>
           </div>
 
-          {/* Duration Input */}
-          <div className="space-y-2">
-            <Label>Duration (minutes)</Label>
-            <Input
-              type="number"
-              min="1"
-              placeholder="Enter minutes"
-              value={minutes}
-              onChange={(e) => setMinutes(e.target.value)}
+          {/* Duration Slider */}
+          <div className="space-y-3">
+            <Label>Duration: {duration} minutes</Label>
+            
+            <div className="flex gap-2 mb-3">
+              {presetDurations.map(preset => (
+                <Button 
+                  key={preset}
+                  type="button"
+                  variant={duration === preset ? "default" : "outline"}
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => setDuration(preset)}
+                >
+                  {preset}m
+                </Button>
+              ))}
+            </div>
+
+            <Slider
+              value={[duration]}
+              onValueChange={([val]) => setDuration(val)}
+              min={1}
+              max={120}
+              step={1}
+              className="w-full"
             />
           </div>
 
           {/* Submit Button */}
           <Button 
             onClick={handleSubmit} 
-            disabled={loading || !date || !techniqueId || !minutes}
+            disabled={loading || !date || !techniqueId}
             className="w-full"
           >
             {loading ? 'Saving...' : 'Log Session'}
