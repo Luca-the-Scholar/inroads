@@ -6,12 +6,13 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Bell, LogOut, User, Shield, Vibrate, Volume2, Sparkles, Check, Heart, ExternalLink, Pencil, Mail, Lock } from "lucide-react";
+import { Bell, LogOut, User, Shield, Vibrate, Volume2, Sparkles, Check, Heart, ExternalLink, Pencil, Mail, Lock, Crown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useHaptic } from "@/hooks/use-haptic";
 import { useTimerSound, TimerSound, SOUND_LABELS } from "@/hooks/use-timer-sound";
 import { ProfileEditDialog } from "@/components/settings/ProfileEditDialog";
+import { AdminPanel } from "@/components/settings/AdminPanel";
 
 export function SettingsView() {
   const [userName, setUserName] = useState("");
@@ -35,6 +36,10 @@ export function SettingsView() {
   const [screenWakeLock, setScreenWakeLock] = useState(true);
   const [visualFlash, setVisualFlash] = useState(true);
   const [testingFlash, setTestingFlash] = useState(false);
+  
+  // Admin state
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminPanelOpen, setAdminPanelOpen] = useState(false);
   
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -60,6 +65,13 @@ export function SettingsView() {
       if (!user) return;
 
       setUserEmail(user.email || "");
+
+      // Check if user is admin
+      const { data: adminCheck } = await supabase.rpc("has_role", {
+        _user_id: user.id,
+        _role: "admin"
+      });
+      setIsAdmin(!!adminCheck);
 
       const { data: profile } = await supabase
         .from("profiles")
@@ -509,6 +521,29 @@ export function SettingsView() {
               </Button>
             </div>
           </Card>
+
+          {/* Admin Panel - Only visible for admins */}
+          {isAdmin && (
+            <Card className="p-6 border-primary/20">
+              <div className="flex items-center gap-3 mb-4">
+                <Crown className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-semibold">Administration</h2>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Manage user roles and approve technique submissions.
+              </p>
+              <Button 
+                variant="outline" 
+                className="w-full min-h-[44px]"
+                onClick={() => setAdminPanelOpen(true)}
+              >
+                <Shield className="w-4 h-4 mr-2" />
+                Open Admin Panel
+              </Button>
+            </Card>
+          )}
+
+          <AdminPanel open={adminPanelOpen} onOpenChange={setAdminPanelOpen} />
 
           <Separator />
 
