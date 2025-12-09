@@ -388,7 +388,7 @@ export function SettingsView() {
                 setStreakVisibility(value);
                 handlePrivacyUpdate('show_streak_to_friends', value);
               }}>
-                  <SelectTrigger className="min-h-[44px]">
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -408,7 +408,7 @@ export function SettingsView() {
                 setTechniqueVisibility(value);
                 handlePrivacyUpdate('show_techniques_to_friends', value);
               }}>
-                  <SelectTrigger className="min-h-[44px]">
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -428,7 +428,7 @@ export function SettingsView() {
                 setHistoryVisibility(value);
                 handlePrivacyUpdate('show_practice_history', value);
               }}>
-                  <SelectTrigger className="min-h-[44px]">
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -449,7 +449,7 @@ export function SettingsView() {
                 handlePrivacyUpdate('share_sessions_in_feed', value);
                 trackEvent('practice_visibility_toggled', { new_visibility_setting: value });
               }}>
-                  <SelectTrigger className="min-h-[44px]">
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Clock, ChevronUp, Loader2, Edit2, Trash2, Check, X, Calendar, Timer, ChevronRight, CalendarDays } from "lucide-react";
+import { Clock, ChevronUp, Loader2, Edit2, Trash2, Check, X, Calendar, Timer, ChevronRight, FileEdit } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -360,8 +360,8 @@ export function SessionFeed({
                 </div>
                 
                 <div className="flex items-center gap-3 text-sm">
-                  <Clock className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Logged:</span>
+                  <FileEdit className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Logged via:</span>
                   <span className="font-medium">
                     {selectedSession.manual_entry ? "Manual entry" : "Timer"}
                   </span>
