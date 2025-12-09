@@ -2,8 +2,10 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Clock, ChevronUp, Loader2, Edit2, Trash2, Check, X, Calendar, Timer, ChevronRight } from "lucide-react";
+import { Clock, ChevronUp, Loader2, Edit2, Trash2, Check, X, Calendar, Timer, ChevronRight, CalendarDays } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { format, differenceInDays, differenceInWeeks, differenceInMonths, differenceInYears } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export interface FeedSession {
   id: string;
@@ -40,7 +43,7 @@ interface SessionFeedProps {
   onLoadMore?: () => void;
   showUserInfo?: boolean;
   editable?: boolean;
-  onEdit?: (sessionId: string, newMinutes: number) => Promise<void>;
+  onEdit?: (sessionId: string, newMinutes: number, newSessionDate?: string) => Promise<void>;
   onDelete?: (sessionId: string) => Promise<void>;
   emptyMessage?: string;
   scrollContainerRef?: React.RefObject<HTMLDivElement>;
@@ -64,6 +67,8 @@ export function SessionFeed({
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editMinutes, setEditMinutes] = useState<string>('');
+  const [editDate, setEditDate] = useState<Date | undefined>(undefined);
+  const [editTime, setEditTime] = useState<string>('');
   const [saving, setSaving] = useState(false);
   const [selectedSession, setSelectedSession] = useState<FeedSession | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -178,22 +183,42 @@ export function SessionFeed({
   const startEdit = (session: FeedSession) => {
     setEditingId(session.id);
     setEditMinutes(session.duration_minutes.toString());
+    const sessionDate = new Date(session.session_date);
+    setEditDate(sessionDate);
+    if (hasExplicitTime(session.session_date)) {
+      setEditTime(format(sessionDate, 'HH:mm'));
+    } else {
+      setEditTime('');
+    }
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setEditMinutes('');
+    setEditDate(undefined);
+    setEditTime('');
   };
 
   const saveEdit = async (sessionId: string) => {
     const newMinutes = parseInt(editMinutes, 10);
-    if (isNaN(newMinutes) || newMinutes <= 0 || !onEdit) return;
+    if (isNaN(newMinutes) || newMinutes <= 0 || !onEdit || !editDate) return;
+    
+    // Build the new session date
+    const newSessionDate = new Date(editDate);
+    if (editTime) {
+      const [hours, minutes] = editTime.split(':').map(Number);
+      newSessionDate.setHours(hours, minutes, 0, 0);
+    } else {
+      newSessionDate.setHours(0, 0, 0, 0);
+    }
     
     setSaving(true);
     try {
-      await onEdit(sessionId, newMinutes);
+      await onEdit(sessionId, newMinutes, newSessionDate.toISOString());
       setEditingId(null);
       setEditMinutes('');
+      setEditDate(undefined);
+      setEditTime('');
     } finally {
       setSaving(false);
     }
@@ -282,16 +307,57 @@ export function SessionFeed({
                 <div className="flex items-center gap-3 text-sm">
                   <Calendar className="w-4 h-4 text-muted-foreground" />
                   <span className="text-muted-foreground">Date:</span>
-                  <span className="font-medium">{formatFullDate(selectedSession.session_date)}</span>
+                  {editingId === selectedSession.id ? (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={cn(
+                            "h-7 text-xs justify-start",
+                            !editDate && "text-muted-foreground"
+                          )}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {editDate ? format(editDate, "PPP") : "Pick date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={editDate}
+                          onSelect={setEditDate}
+                          disabled={(date) => date > new Date()}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  ) : (
+                    <span className="font-medium">{formatFullDate(selectedSession.session_date)}</span>
+                  )}
                 </div>
                 
-                {hasExplicitTime(selectedSession.session_date) && (
-                  <div className="flex items-center gap-3 text-sm">
-                    <Clock className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Time:</span>
+                <div className="flex items-center gap-3 text-sm">
+                  <Clock className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Time:</span>
+                  {editingId === selectedSession.id ? (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="time"
+                        value={editTime}
+                        onChange={(e) => setEditTime(e.target.value)}
+                        className="h-7 w-28 text-xs"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                      <span className="text-xs text-muted-foreground">(optional)</span>
+                    </div>
+                  ) : hasExplicitTime(selectedSession.session_date) ? (
                     <span className="font-medium">{formatTime(selectedSession.session_date)}</span>
-                  </div>
-                )}
+                  ) : (
+                    <span className="text-muted-foreground italic">Not set</span>
+                  )}
+                </div>
                 
                 <div className="flex items-center gap-3 text-sm">
                   <Clock className="w-4 h-4 text-muted-foreground" />
