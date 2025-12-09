@@ -217,7 +217,16 @@ export function ActivityFeed() {
 
   if (sessions.length === 0) {
     return (
-      <div className="text-center py-12 text-muted-foreground">
+      <div 
+        className="text-center py-12 text-muted-foreground"
+        {...(showPullToRefresh ? handlers : {})}
+      >
+        {showPullToRefresh && (
+          <PullToRefreshIndicator 
+            pullDistance={pullDistance} 
+            isRefreshing={isRefreshing} 
+          />
+        )}
         <Heart className="w-12 h-12 mx-auto mb-3 opacity-50" />
         <p className="font-medium">No activity yet</p>
         <p className="text-sm mt-1">
