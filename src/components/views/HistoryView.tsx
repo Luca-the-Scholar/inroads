@@ -124,10 +124,18 @@ export function HistoryView() {
       setCurrentStreak(streak);
   };
 
-  const handleEditSession = async (sessionId: string, newMinutes: number) => {
+  const handleEditSession = async (sessionId: string, newMinutes: number, newSessionDate?: string) => {
+    const updateData: { duration_minutes: number; session_date?: string } = { 
+      duration_minutes: newMinutes 
+    };
+    
+    if (newSessionDate) {
+      updateData.session_date = newSessionDate;
+    }
+    
     const { error } = await supabase
       .from('sessions')
-      .update({ duration_minutes: newMinutes })
+      .update(updateData)
       .eq('id', sessionId);
 
     if (error) throw error;
