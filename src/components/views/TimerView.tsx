@@ -407,7 +407,7 @@ export function TimerView() {
               Select Technique
             </h2>
             <Select value={selectedTechniqueId} onValueChange={setSelectedTechniqueId}>
-              <SelectTrigger className="min-h-[48px]">
+              <SelectTrigger>
                 <SelectValue placeholder="Choose a technique" />
               </SelectTrigger>
               <SelectContent>
@@ -446,7 +446,7 @@ export function TimerView() {
                 <Button 
                   key={preset}
                   variant={duration === preset ? "default" : "outline"}
-                  className="flex-1 min-h-[44px]"
+                  className="flex-1"
                   onClick={() => setDuration(preset)}
                 >
                   {preset}m
@@ -487,7 +487,7 @@ export function TimerView() {
                   localStorage.setItem('selectedSound', val);
                 }}
               >
-                <SelectTrigger className="min-h-[48px] flex-1">
+                <SelectTrigger className="flex-1">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -504,7 +504,6 @@ export function TimerView() {
               <Button
                 variant="outline"
                 size="icon"
-                className="min-h-[48px] min-w-[48px]"
                 onClick={async () => {
                   if (selectedSound !== 'none') {
                     await unlockAudio();
@@ -523,7 +522,7 @@ export function TimerView() {
             onClick={handleStart} 
             variant="accent"
             size="lg" 
-            className="w-full min-h-[56px] text-lg"
+            className="w-full text-lg"
             disabled={!selectedTechniqueId}
           >
             <Play className="w-5 h-5 mr-2" />
