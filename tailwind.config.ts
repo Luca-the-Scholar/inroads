@@ -56,6 +56,9 @@ export default {
           foreground: "hsl(var(--success-foreground))",
         },
         glow: {
+          gold: "hsl(var(--glow-gold))",
+          amber: "hsl(var(--glow-amber))",
+          // Legacy names for compatibility
           blue: "hsl(var(--glow-blue))",
           orange: "hsl(var(--glow-orange))",
         },
@@ -68,14 +71,17 @@ export default {
         "2xl": "calc(var(--radius) + 8px)",
       },
       boxShadow: {
-        'glow-sm': '0 0 12px hsl(var(--glow-blue) / 0.2)',
-        'glow-md': '0 4px 24px hsl(var(--glow-blue) / 0.25)',
-        'glow-lg': '0 8px 48px hsl(var(--glow-blue) / 0.3)',
-        'glow-orange-sm': '0 0 12px hsl(var(--glow-orange) / 0.2)',
-        'glow-orange-md': '0 4px 24px hsl(var(--glow-orange) / 0.25)',
-        'glow-orange-lg': '0 8px 48px hsl(var(--glow-orange) / 0.3)',
+        'glow-sm': '0 0 12px hsl(var(--glow-gold) / 0.15)',
+        'glow-md': '0 4px 24px hsl(var(--glow-gold) / 0.2)',
+        'glow-lg': '0 8px 48px hsl(var(--glow-gold) / 0.25)',
+        'glow-gold-sm': '0 0 12px hsl(var(--glow-gold) / 0.15)',
+        'glow-gold-md': '0 4px 24px hsl(var(--glow-gold) / 0.2)',
+        'glow-gold-lg': '0 8px 48px hsl(var(--glow-gold) / 0.25)',
+        'glow-amber-sm': '0 0 12px hsl(var(--glow-amber) / 0.15)',
+        'glow-amber-md': '0 4px 24px hsl(var(--glow-amber) / 0.2)',
+        'glow-amber-lg': '0 8px 48px hsl(var(--glow-amber) / 0.25)',
         'soft': '0 4px 20px hsl(var(--background) / 0.5)',
-        'elevated': '0 8px 32px hsl(0 0% 0% / 0.3)',
+        'elevated': '0 8px 32px hsl(0 0% 0% / 0.35)',
       },
       keyframes: {
         "accordion-down": {
@@ -88,10 +94,10 @@ export default {
         },
         "pulse-glow": {
           "0%, 100%": { 
-            boxShadow: "0 0 20px hsl(var(--glow-blue) / 0.3)",
+            boxShadow: "0 0 20px hsl(var(--glow-gold) / 0.25)",
           },
           "50%": { 
-            boxShadow: "0 0 40px hsl(var(--glow-blue) / 0.5)",
+            boxShadow: "0 0 40px hsl(var(--glow-gold) / 0.4)",
           },
         },
         "fade-in": {
